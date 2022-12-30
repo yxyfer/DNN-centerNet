@@ -17,7 +17,7 @@ class Trainer:
             loss (torch.nn.Module): Loss function to use.
             device (str): Device to use (cuda or cpu).
         """
-        self.model = model
+        self.model = model.to(device)
         self.optimizer = optimizer
         self.loss = loss
         self.device = device
