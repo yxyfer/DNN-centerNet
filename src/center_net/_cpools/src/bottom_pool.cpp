@@ -1,5 +1,4 @@
 #include <torch/torch.h>
-
 #include <vector>
 
 std::vector<torch::Tensor> pool_forward(
