@@ -1,5 +1,4 @@
 #include <torch/torch.h>
-#include <vector>
 
 std::vector<torch::Tensor> top_pool_forward(
     torch::Tensor input
