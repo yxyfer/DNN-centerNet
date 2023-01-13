@@ -1,5 +1,6 @@
 import argparse
-from src.backbone import BackboneNetwork, Trainer, get_MNIST
+from src.backbone import BackboneNetwork, get_MNIST
+from src.training import Trainer
 
 import torch
 
@@ -25,7 +26,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
     
     trainer = Trainer(model, optimizer, loss, device)
-    vals = trainer.training_process(train_dataloader, test_dataloader, epochs=20)
+    vals = trainer.train(train_dataloader, test_dataloader, epochs=20)
 
     if args.save:
         torch.save(model.state_dict(), f"models/{args.name}")

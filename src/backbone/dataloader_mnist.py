@@ -24,5 +24,5 @@ def get_MNIST(batch_size: int = 64) -> Tuple[DataLoader, DataLoader]:
     training_data = _load_data_MNIST(train=True)
     test_data = _load_data_MNIST(train=False)
     
-    return (DataLoader(training_data, batch_size=batch_size),
-            DataLoader(test_data, batch_size=batch_size))
+    return (DataLoader(training_data, batch_size=batch_size, shuffle=True),
+            DataLoader(test_data, batch_size=batch_size, shuffle=True))

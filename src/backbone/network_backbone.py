@@ -1,5 +1,5 @@
 from torch import nn
-from .utils_networks import Convolution
+from ..helpers import Convolution
 
 class BackboneNetwork(nn.Module):
     def __init__(self):
