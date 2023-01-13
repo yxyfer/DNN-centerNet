@@ -4,8 +4,9 @@ import sys
 import os
 import glob
 
-file = glob.glob(os.path.join("dist", "cpools-0.0.0-*.egg"))[0]
-sys.path.append(os.path.join(os.path.dirname(__file__), file))
+curr_dir = os.path.dirname(__file__)
+file = glob.glob(os.path.join(curr_dir + "/dist", "cpools-0.0.0-*.egg"))[0]
+sys.path.append(os.path.join(curr_dir, file))
 
 import top_pool, bottom_pool, left_pool, right_pool
 
