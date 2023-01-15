@@ -6,7 +6,7 @@
 
 import numpy as np
 
-def gaussian2D(shape, sigma=1):
+def gaussian_2d(shape, sigma=1):
   m, n = [(ss - 1.) / 2. for ss in shape]
   y, x = np.ogrid[-m:m + 1, -n:n + 1]
 
@@ -16,7 +16,7 @@ def gaussian2D(shape, sigma=1):
 
 def draw_gaussian(heatmap, center, radius, k=1, delta=6):
   diameter = 2 * radius + 1
-  gaussian = gaussian2D((diameter, diameter), sigma=diameter / delta)
+  gaussian = gaussian_2d((diameter, diameter), sigma=diameter / delta)
 
   x, y = center
 

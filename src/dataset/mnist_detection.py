@@ -1,7 +1,6 @@
 from torch.utils.data import Dataset
 import os
 import cv2
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import math
@@ -83,14 +82,6 @@ class MnistDetection(Dataset):
         sorted_inds = np.argsort(labels, axis=0)
         bboxes = bboxes[sorted_inds]
         labels = labels[sorted_inds]
-        
-        #### Debug ####
-        # plt.imshow(image)
-        # plt.show()
-        # print(image.shape)
-        # print(labels)
-        # print(bboxes)
-        ###############
         
         return image, labels, bboxes
         
