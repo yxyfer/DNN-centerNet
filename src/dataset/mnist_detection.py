@@ -114,7 +114,7 @@ class MnistDetection(Dataset):
         inds_ct = np.zeros((max_objects,), dtype=np.int64)
         
         num_objs = np.array(min(bboxes.shape[0], max_objects))
-        ind_masks = np.zeros((max_objects,), dtype=np.uint8)
+        ind_masks = np.zeros((max_objects,), dtype=np.bool)
         ind_masks[:num_objs] = 1
        
         img_size_h = self.img_shape[1]

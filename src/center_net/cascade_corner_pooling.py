@@ -1,6 +1,6 @@
 from torch import nn
 from ..helpers import Convolution
-from _cpools import TopPool, BottomPool, LeftPool, RightPool
+from ._cpools import TopPool, BottomPool, LeftPool, RightPool
 
 
 class CascadeCornerPooling(nn.Module):

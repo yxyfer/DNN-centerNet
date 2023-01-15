@@ -2,19 +2,22 @@ import torch
 from torch import nn
 
 class Convolution(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size: int = 3):
+    def __init__(self, in_channels: int, out_channels: int,
+                 kernel_size: int = 3, stride: int = 1, with_bn: bool = True):
         super(Convolution, self).__init__()
         
         padding = (kernel_size - 1) // 2
         
-        self.network = nn.Sequential(
-            nn.Conv2d(in_channels, out_channels, kernel_size, bias=False, padding=padding),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
-        )
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size,
+                              bias = not with_bn, padding=padding, stride=stride)
+        self.bn = nn.BatchNorm2d(out_channels) if with_bn else nn.Sequential()
+        self.relu = nn.ReLU(inplace=True)
         
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.network(x)
+        x = self.conv(x)
+        x = self.bn(x)
+        x = self.relu(x)
+        return x
         
 class Residual(nn.Module):
     def __init__(self, in_channels: int, hid_channels: int, kernel_size: int = 3):

@@ -1,6 +1,6 @@
 from torch import nn
 from ..helpers import Convolution
-from _cpools import TopPool, BottomPool, LeftPool, RightPool
+from ._cpools import TopPool, BottomPool, LeftPool, RightPool
 
 
 class CenterPooling(nn.Module):
@@ -20,7 +20,7 @@ class CenterPooling(nn.Module):
         up = self.left_pool(up)
         up = self.right_pool(up)
         
-        down = self.conv_bottom(x)
+        down = self.conv_down(x)
         down = self.top_pool(down)
         down = self.bottom_pool(down)
         

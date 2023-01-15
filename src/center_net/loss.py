@@ -16,7 +16,7 @@ class CenterNetLoss(nn.Module):
         L = Ldet + Loff + Lpull + Lpush
         """
         
-        super(CenterNetLoss).__init__()
+        super(CenterNetLoss, self).__init__()
 
     def focal_loss(self, y_hat, y): 
         """This loss is used to train the CenterNet model.
