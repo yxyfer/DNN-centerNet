@@ -3,18 +3,13 @@ from ..helpers import Convolution
 from .cascade_corner_pooling import CascadeTLCornerPooling, CascadeBRCornerPooling
 from .center_pooling import CenterPooling
 from .layers import HeatMapLayer, EmbeddingLayer, OffsetLayer
+from ..backbone import load_backbone_model
 
-class CornerNet(nn.Module):
-    def __init__(self, backbone: nn.Module):
-        super(CornerNet, self).__init__()
+class CenterNet(nn.Module):
+    def __init__(self):
+        super(CenterNet, self).__init__()
 
-        # self.backbone = get_baclbone_model()
-        self.backbone = nn.Sequential(
-            Convolution(1, 32),
-            nn.MaxPool2d(2),
-            Convolution(32, 64),
-            nn.MaxPool2d(2),
-        )       
+        self.backbone = load_backbone_model("models/backbone_model.pth")
         
         self.post = nn.Sequential(
             Convolution(64, 128),
@@ -24,10 +19,6 @@ class CornerNet(nn.Module):
         self.cascade_tl_pool = CascadeTLCornerPooling(128, 128)
         self.cascade_br_pool = CascadeBRCornerPooling(128, 128)
         self.center_pool = CenterPooling(128, 128)
-
-        # self.cascade_tl_pool = Convolution(128, 128)
-        # self.cascade_br_pool = Convolution(128, 128)
-        # self.center_pool = Convolution(128, 128)
         
         self.hmap_tl = HeatMapLayer(128, 128, 10)
         self.hmap_br = HeatMapLayer(128, 128, 10)
