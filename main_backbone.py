@@ -29,5 +29,5 @@ if __name__ == '__main__':
     vals = trainer.train(train_dataloader, test_dataloader, epochs=20)
 
     if args.save:
-        torch.save(model.state_dict(), f"models/{args.name}")
+        trainer.save(f"models/{args.name}")
     
