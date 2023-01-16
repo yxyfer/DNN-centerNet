@@ -15,6 +15,15 @@ class CenterPooling(nn.Module):
         self.right_pool = RightPool()
         self.left_pool = LeftPool()
         
+        self.p_conv1 = nn.Conv2d(out_channels, out_channels, (3, 3), padding=(1, 1), bias=False)
+        self.p_bn1   = nn.BatchNorm2d(out_channels)
+        
+        self.conv1 = nn.Conv2d(out_channels, out_channels, (1, 1), bias=False)
+        self.bn1   = nn.BatchNorm2d(out_channels)
+        self.relu1 = nn.ReLU(inplace=True)
+
+        self.conv2 = Convolution(out_channels, out_channels)
+        
     def forward(self, x):
         up = self.conv_up(x)
         up = self.left_pool(up)
@@ -24,5 +33,13 @@ class CenterPooling(nn.Module):
         down = self.top_pool(down)
         down = self.bottom_pool(down)
         
-        return up + down
+        merge = self.p_conv1(up + down)
+        merge = self.p_bn1(merge)
+        
+        conv1 = self.conv1(x)
+        bn1   = self.bn1(conv1)
+        relu1 = self.relu1(merge + bn1)
+
+        conv2 = self.conv2(relu1)
+        return conv2
         

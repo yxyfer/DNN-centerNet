@@ -1,5 +1,5 @@
 from torch import nn
-from ..helpers import Convolution
+from ..helpers import Convolution, Residual
 from .cascade_corner_pooling import CascadeTLCornerPooling, CascadeBRCornerPooling
 from .center_pooling import CenterPooling
 from .layers import HeatMapLayer, EmbeddingLayer, OffsetLayer
@@ -14,6 +14,9 @@ class CenterNet(nn.Module):
         self.post = nn.Sequential(
             Convolution(64, 128),
             Convolution(128, 128),
+            Convolution(128, 128),
+            Convolution(128, 128),
+            Convolution(128, 128),
         )
         
         self.cascade_tl_pool = CascadeTLCornerPooling(128, 128)
@@ -23,6 +26,10 @@ class CenterNet(nn.Module):
         self.hmap_tl = HeatMapLayer(128, 128, 10)
         self.hmap_br = HeatMapLayer(128, 128, 10)
         self.hmap_ct = HeatMapLayer(128, 128, 10)
+        
+        self.hmap_tl.heatmap[-1].bias.data.fill_(-2.19)
+        self.hmap_br.heatmap[-1].bias.data.fill_(-2.19)
+        self.hmap_ct.heatmap[-1].bias.data.fill_(-2.19)
         
         self.embd_tl = EmbeddingLayer(128, 128, 1)
         self.embd_br = EmbeddingLayer(128, 128, 1)
