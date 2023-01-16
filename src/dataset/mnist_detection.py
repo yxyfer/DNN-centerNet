@@ -119,7 +119,7 @@ class MnistDetection(Dataset):
        
         img_size_h = self.img_shape[1]
         img_size_w = self.img_shape[2]
-         
+        
         for i, ((xtl, ytl, xbr, ybr), label) in enumerate(zip(bboxes, labels)):
             xct, yct = (xbr + xtl) / 2., (ybr + ytl) / 2.
             
@@ -157,13 +157,13 @@ class MnistDetection(Dataset):
             inds_br[i] = iybr * fmap_size_w + ixbr
             inds_ct[i] = iyct * fmap_size_w + ixct
             
-            return {
-                'image': image,
-                'hmap_tl': heat_map_tl, 'hmap_br': heat_map_br, 'hmap_ct': heat_map_ct,
-                'regs_tl': regs_tl, 'regs_br': regs_br, 'regs_ct': regs_ct,
-                'inds_tl': inds_tl, 'inds_br': inds_br, 'inds_ct': inds_ct,
-                'ind_masks': ind_masks
-            }
+        return {
+            'image': image,
+            'hmap_tl': heat_map_tl, 'hmap_br': heat_map_br, 'hmap_ct': heat_map_ct,
+            'regs_tl': regs_tl, 'regs_br': regs_br, 'regs_ct': regs_ct,
+            'inds_tl': inds_tl, 'inds_br': inds_br, 'inds_ct': inds_ct,
+            'ind_masks': ind_masks # Number of objects
+        }
     
     def __len__(self):
-        return self.num_samples 
+        return self.num_samples
