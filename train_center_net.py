@@ -22,21 +22,6 @@ def parse_args():
     
     return parser.parse_args()
 
-def train(model, train_loader, optimizer, loss_fn, epochs=20):
-    model.train()
-    
-    for e in range(epochs):
-        for batch in train_loader:
-            outputs = model(batch['image'])
-            
-            loss = loss_fn(outputs, batch)
-            
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-        
-        print(f"Epoch: {e}, Loss: {loss.item()}")
-
 if __name__ == '__main__':
     args = parse_args()
     

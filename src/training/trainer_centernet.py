@@ -1,6 +1,4 @@
 import torch
-# from typing import Tuple
-# from .saver import SaveBestModel
 
 
 class TrainerCenterNet:
@@ -18,29 +16,64 @@ class TrainerCenterNet:
             device (str): Device to use (cuda or cpu).
             scheduler (torch.optim.lr_scheduler.StepLR): Scheduler to use, to reduce the learning rate. Defaults to None.
         """
-        self.model = model
+        self.model = model.to(device)
         self.optimizer = optimizer
         self.loss = loss
         self.scheduler = scheduler
         self.device = device
         
+    def _batch_to_device(self, batch):
+        batch['image'] = batch['image'].to(self.device)
         
-    def _train(self, dataloader: torch.utils.data.DataLoader) -> float:
-        """Train the model for one epoch.
+        batch['inds_tl'] = batch['inds_tl'].to(self.device)
+        batch['inds_br'] = batch['inds_br'].to(self.device)
+        batch['inds_ct'] = batch['inds_ct'].to(self.device)
+        batch['hmap_tl'] = batch['hmap_tl'].to(self.device)
+        batch['hmap_br'] = batch['hmap_br'].to(self.device)
+        batch['hmap_ct'] = batch['hmap_ct'].to(self.device)
+        batch['regs_tl'] = batch['regs_tl'].to(self.device)
+        batch['regs_br'] = batch['regs_br'].to(self.device)
+        batch['regs_ct'] = batch['regs_ct'].to(self.device)
+        batch['ind_masks'] = batch['ind_masks'].to(self.device)
+        
+        
+    def evaluate(self, dataloader: torch.utils.data.DataLoader) -> float:
+        """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
         
         Returns:
-            float: Loss of the epoch.
+            float: Loss of the dataloader.
+        """
+        
+        num_batches = len(dataloader)
+        self.model.eval()
+        
+        test_loss = 0
+        with torch.no_grad():
+            for batch in dataloader:
+                self._batch_to_device(batch)
+                outputs = self.model(batch['image'])
+                
+                test_loss += self.loss(outputs, batch).item()
+                
+        test_loss /= num_batches
+
+        return test_loss
+        
+    def _train(self, dataloader: torch.utils.data.DataLoader):
+        """Train the model for one epoch.
+        Args:
+            dataloader (torch.utils.data.DataLoader): Dataloader to use.
         """
         
         self.model.train()
         
         for batch in dataloader:
+            self._batch_to_device(batch)
             outputs = self.model(batch['image'])
             
             loss = self.loss(outputs, batch)
-            
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -48,22 +81,19 @@ class TrainerCenterNet:
         if self.scheduler is not None:
             self.scheduler.step()
             
-        return loss.item()
-
     def save(self, path: str) -> None:
         """Save the model.
         Args:
             path (str): Path to save the model.
         """
         
-        torch.save(self.model.state_dict(), path)
+        torch.save(self.model.to('cpu').state_dict(), path)
         print(f"Model saved to {path}.")
+        self.model.to(self.device)
    
     def train(self,
               train_loader: torch.utils.data.DataLoader,
               epochs: int = 10,
-              keep_best: bool = False,
-              path_best_model: str = "best_model.pth"
               ) -> list:
         """Train the model for a given number of epochs.
         
@@ -79,8 +109,9 @@ class TrainerCenterNet:
         train_losses = [0] * epochs
         
         for e in range(epochs):
-            train_loss = self._train(train_loader)
-            
+            self._train(train_loader)
+           
+            train_loss = self.evaluate(train_loader)
             train_losses[e] = train_loss
             
             print(f"Epoch {e + 1}/{epochs}, Train loss: {train_loss:.4f}")
