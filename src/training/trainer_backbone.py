@@ -3,7 +3,7 @@ from typing import Tuple
 from .saver import SaveBestModel
 
 
-class Trainer:
+class TrainerBackbone:
     def __init__(self,
                  model: torch.nn.Module,
                  optimizer: torch.optim.Optimizer,

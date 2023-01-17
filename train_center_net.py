@@ -2,6 +2,7 @@ import argparse
 from src.dataset import MnistDetection
 from src.center_net import CenterNetLoss
 from src.center_net.network import CenterNet
+from src.training import TrainerCenterNet
 
 
 import torch
@@ -42,12 +43,16 @@ if __name__ == '__main__':
     dataset = MnistDetection(args.dataset, train=True)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True) 
    
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    
     model = CenterNet()
     optimizer = torch.optim.Adam(model.parameters())
+    loss = CenterNetLoss()
+
+    trainer = TrainerCenterNet(model, optimizer, loss, device)
 
     print("Training CenterNet model...")
-    train(model, train_loader, optimizer, CenterNetLoss(), epochs=args.epochs)
+    vals = trainer.train(train_loader, epochs=args.epochs)
     
     if args.save:
-        torch.save(model.state_dict(), f"models/{args.name}")
-    
+        trainer.save(f"models/{args.name}")
