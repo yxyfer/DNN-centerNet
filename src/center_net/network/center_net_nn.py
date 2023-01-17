@@ -1,9 +1,9 @@
 from torch import nn
-from ..helpers import Convolution, Residual
+from ...helpers import Convolution, Residual
 from .cascade_corner_pooling import CascadeTLCornerPooling, CascadeBRCornerPooling
 from .center_pooling import CenterPooling
 from .layers import HeatMapLayer, EmbeddingLayer, OffsetLayer
-from ..backbone import load_backbone_model
+from ...backbone import load_backbone_model
 
 class CenterNet(nn.Module):
     def __init__(self):

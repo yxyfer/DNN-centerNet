@@ -1,14 +1,8 @@
 from torch import nn
 import torch
 from torch.nn import functional as F
+from .utils import _tranpose_and_gather_feature
 
-
-def _tranpose_and_gather_feature(feature, ind):
-    feature = feature.permute(0, 2, 3, 1).contiguous()  # [B, C, H, W] => [B, H, W, C]
-    feature = feature.view(feature.size(0), -1, feature.size(3))  # [B, H, W, C] => [B, H x W, C]
-    ind = ind[:, :, None].expand(ind.shape[0], ind.shape[1], feature.shape[-1])  # [B, num_obj] => [B, num_obj, C]
-    feature = feature.gather(1, ind)  # [B, H x W, C] => [B, num_obj, C]
-    return feature
 
 class CenterNetLoss(nn.Module):
     def __init__(self):

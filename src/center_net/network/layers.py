@@ -1,5 +1,5 @@
 from torch import nn
-from ..helpers import Convolution
+from ...helpers import Convolution
 
 def _conv_layer(in_channels: int, hidden_channels: int, out_channels: int):
     return nn.Sequential(
