@@ -17,5 +17,17 @@ python setup_gpu.py install --user
 ### Train backbone network
 
 ```bash
-python main_backbone.py
+python train_backbone.py
+```
+
+### Train CenterNet
+
+```bash
+python train_center_net.py
+```
+
+### Test an image
+
+```bash
+python test_center_net.py <path_to_image>
 ```

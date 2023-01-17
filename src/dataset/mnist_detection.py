@@ -31,17 +31,20 @@ class MnistDetection(Dataset):
     
     gaussian_iou = 0.7
     
-    def __init__(self, data_dir: str, train: bool = True, img_shape: tuple = (1, 300, 300)):
+    def __init__(self, data_dir: str, train: bool = True, img_shape: tuple = (1, 300, 300),
+                 max_images: int = 500):
         """Create a dataset for the MNIST detection.
 
         Args:
             data_dir (str): Path to the dataset.
             train (bool, optional): Train dataset?. Defaults to True.
             img_size (tuple, optional): Shape of an Image (C, H, W). Defaults to (1, 300, 300).
+            max_images (int, optional): Max number of images to load. Defaults to 500.
         """
         
         self.train = train
         self.img_shape = img_shape
+        self.max_images = max_images
         self.feature_map_size = {
             'h': 75,
             'w': 75,
@@ -66,6 +69,9 @@ class MnistDetection(Dataset):
         label_files = os.listdir(labels_path)
         label_files = [i for i in label_files if i.endswith(".txt")]
         label_files.sort()
+        
+        image_files = image_files[:self.max_images]
+        label_files = label_files[:self.max_images]
         
         images = [cv2.imread(images_path + i, cv2.IMREAD_GRAYSCALE) for i in image_files]
         images = [np.expand_dims(i, axis=2) for i in images]

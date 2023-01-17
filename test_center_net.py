@@ -18,10 +18,10 @@ def decode_ouputs(outputs: list) -> list:
     """
     
     dets, cts = decode(*outputs, 
-                       K=10,
+                       K=70,
                        ae_threshold=0.5,
                        kernel=3,
-                       num_dets=20)
+                       num_dets=1000)
 
     dets = dets.detach().numpy()
     cts = cts.detach().numpy()
@@ -43,6 +43,7 @@ def pred(model, image):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("image", help="Path to image")
+    parser.add_argument("--filter", help="Filter the bbox. Default True", action="store_true")
     
     args = parser.parse_args()
     image = np.array(Image.open(args.image), dtype=np.float32)
@@ -56,4 +57,4 @@ if __name__ == "__main__":
     
     image = image.transpose((1, 2, 0))
      
-    display_bbox(image, dets)
+    display_bbox(image, dets, filter=args.filter)
