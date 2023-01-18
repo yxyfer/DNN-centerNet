@@ -23,8 +23,11 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     
-    dataset = MnistDetection(args.dataset, train=True)
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True) 
+    dataset_train = MnistDetection(args.dataset, train=True)
+    dataset_test = MnistDetection(args.dataset, train=False)
+    
+    train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True) 
+    test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=args.batch_size, shuffle=True) 
    
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -35,6 +38,6 @@ if __name__ == '__main__':
     trainer = TrainerCenterNet(model, optimizer, loss, device)
 
     print("Training CenterNet model...")
-    vals = trainer.train(train_loader, epochs=args.epochs)
+    vals = trainer.train(train_loader, test_loader, epochs=args.epochs, keep_best=True)
     
     trainer.save(f"models/{args.name}")

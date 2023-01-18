@@ -79,7 +79,7 @@ class CenterNetLoss(nn.Module):
 
         return pull / len(embd0s), push / len(embd0s)
     
-    def forward(self, outputs, batch):
+    def forward(self, outputs, batch, full=False):
         hmap_tl, hmap_br, hmap_ct, embd_tl, embd_br, regs_tl, regs_br, regs_ct = zip(*outputs)
         
         embd_tl = [_tranpose_and_gather_feature(e, batch['inds_tl']) for e in embd_tl]
@@ -98,6 +98,12 @@ class CenterNetLoss(nn.Module):
                    
         pull_loss, push_loss = self.ae_loss(embd_tl, embd_br, batch['ind_masks'])
         
-        return focal_loss + 0.1 * pull_loss + 0.1 * push_loss + reg_loss
+        loss = focal_loss + 0.1 * pull_loss + 0.1 * push_loss + reg_loss
+
+        if full:
+            return [loss, focal_loss, pull_loss, push_loss, reg_loss]
+        
+        return loss
+        
         
         
