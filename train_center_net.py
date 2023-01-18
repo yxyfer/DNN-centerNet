@@ -23,7 +23,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     
-    dataset = MnistDetection(args.dataset, train=True, max_images=4)
+    dataset = MnistDetection(args.dataset, train=True)
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True) 
    
     device = "cuda" if torch.cuda.is_available() else "cpu"
