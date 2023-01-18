@@ -97,6 +97,7 @@ class TrainerCenterNet:
    
     def train(self,
               train_loader: torch.utils.data.DataLoader,
+              test_loader: torch.utils.data.DataLoader,
               epochs: int = 10,
               keep_best: bool = False,
               path_best_model: str = "best_model.pth"
@@ -105,6 +106,7 @@ class TrainerCenterNet:
         
         Args:
             train_loader (torch.utils.data.DataLoader): Dataloader for the training set.
+            train_loader (torch.utils.data.DataLoader): Dataloader for the test set.
             epochs (int, optional): Number of epochs. Defaults to 10.
             keep_best (bool, optional): Keep the best model. Defaults to False.
             path_best_model (str, optional): Path to save the best model. Defaults to "best_model.pth".
@@ -113,6 +115,7 @@ class TrainerCenterNet:
             list: Train loss
         """
         train_losses = [0] * epochs
+        test_losses = [0] * epochs
         
         save_model = SaveBestModel(path_best_model, float('inf'), lambda b, v: v < b)
         
@@ -120,15 +123,22 @@ class TrainerCenterNet:
             self._train(train_loader)
            
             tr_loss, tr_focal_loss, tr_push_loss, tr_pull_loss, tr_reg_loss = self.evaluate(train_loader)
+            te_loss, te_focal_loss, te_push_loss, te_pull_loss, te_reg_loss = self.evaluate(test_loader)
+
             train_losses[e] = tr_loss
+            test_losses[e] = te_loss
             
             saved = ""
             if keep_best:
-                saved = "---> Saved" if save_model(self.model, tr_loss) else ""
+                saved = "---> Saved" if save_model(self.model, te_loss) else ""
                 
             print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_loss:.4f}, "
                   f"Train focal loss: {tr_focal_loss:.4f}, Train push loss: {tr_push_loss:.4f}, "
-                  f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f} {saved}")
+                  f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f}")
+
+            print(f"Epoch {e + 1}/{epochs}, Test loss: {te_loss:.4f}, "
+                  f"Test focal loss: {te_focal_loss:.4f}, Test push loss: {te_push_loss:.4f}, "
+                  f"Test pull loss: {te_pull_loss:.4f}, Test reg loss: {te_reg_loss:.4f} {saved}\n")
             
         if keep_best:
             self.model.load_state_dict(torch.load(path_best_model))
