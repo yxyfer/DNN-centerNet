@@ -1,9 +1,11 @@
 from .ploting import Ploting
 from .saver import SaveBestModel
-from .trainer import Trainer
+from .trainer_backbone import TrainerBackbone
+from .trainer_centernet import TrainerCenterNet
 
 __all__ = [
     "Ploting",
     "SaveBestModel",
-    "Trainer",
+    "TrainerBackbone",
+    "TrainerCenterNet"
 ]

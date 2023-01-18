@@ -1,6 +1,8 @@
 from .utils_networks import Convolution, Residual
+from .bbox import display_bbox
 
 __all__ = [
     "Convolution",
-    "Residual"
+    "Residual",
+    "display_bbox",
 ]

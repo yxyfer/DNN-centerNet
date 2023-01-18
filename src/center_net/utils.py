@@ -164,6 +164,7 @@ def center_match(detections, centers):
     box_width = valid_detections[:, 2] - valid_detections[:, 0]
     box_height = valid_detections[:, 3] - valid_detections[:, 1]
 
+    # -- See if the box is small or large
     small_box_ind = (box_width * box_height <= 22500)
     large_box_ind = (box_width * box_height > 22500)
 
