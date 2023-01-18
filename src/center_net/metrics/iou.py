@@ -15,10 +15,16 @@ class IoU(object):
         self.y_hat = y_hat
 
         self.pre_process()
-        self.iou = self.perform_calculation()
+        self._iou = self.perform_calculation()
 
     def __call__(self):
-        return self.iou
+        return self._iou
+
+    def __eq__(self, other):
+        return self._iou == other
+
+    def __ne__(self, other):
+        return self._iou != other
 
     def pre_process(self):
         pass
@@ -37,5 +43,3 @@ class IoU(object):
         iou = interection_area / float(y_true_area + y_hat_area - interection_area)
 
         return iou
-
-
