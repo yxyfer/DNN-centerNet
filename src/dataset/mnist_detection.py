@@ -29,7 +29,7 @@ class MnistDetection(Dataset):
     images_path = "/images/"
     labels_path = "/labels/"
     
-    gaussian_iou = 0.7
+    gaussian_iou = 0.6
     
     def __init__(self, data_dir: str, train: bool = True, img_shape: tuple = (1, 300, 300),
                  max_images: int = 500):
@@ -152,9 +152,9 @@ class MnistDetection(Dataset):
             
             radius = max(0, int(gaussian_radius((height, width), MnistDetection.gaussian_iou)))
 
-            draw_gaussian(heat_map_tl[label], [ixtl, iytl], radius)
-            draw_gaussian(heat_map_br[label], [ixbr, iybr], radius)
-            draw_gaussian(heat_map_ct[label], [ixct, iyct], radius, delta=5)
+            draw_gaussian(heat_map_tl[label], (ixtl, iytl), radius)
+            draw_gaussian(heat_map_br[label], (ixbr, iybr), radius)
+            draw_gaussian(heat_map_ct[label], (ixct, iyct), radius, delta=5)
 
             regs_tl[i, :] = [fxtl - ixtl, fytl - iytl]
             regs_br[i, :] = [fxbr - ixbr, fybr - iybr]
