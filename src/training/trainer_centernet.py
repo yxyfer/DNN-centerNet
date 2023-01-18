@@ -1,5 +1,6 @@
 import torch
 from .saver import SaveBestModel
+import numpy as np
 
 
 class TrainerCenterNet:
@@ -38,29 +39,31 @@ class TrainerCenterNet:
         batch['ind_masks'] = batch['ind_masks'].to(self.device)
         
         
-    def evaluate(self, dataloader: torch.utils.data.DataLoader) -> float:
+    def evaluate(self, dataloader: torch.utils.data.DataLoader) -> np.array:
         """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
         
         Returns:
-            float: Loss of the dataloader.
+            np.array: Losses for each loss function. [loss, focal_loss, push_loss, pull_loss, reg_loss]
         """
         
         num_batches = len(dataloader)
         self.model.eval()
         
-        test_loss = 0
+        test_losses = np.array([0, 0, 0, 0, 0], dtype=np.float64)
+        
         with torch.no_grad():
             for batch in dataloader:
                 self._batch_to_device(batch)
                 outputs = self.model(batch['image'])
                 
-                test_loss += self.loss(outputs, batch).item()
+                losses = self.loss(outputs, batch, True)
+                losses = np.array([l.item() for l in losses])
                 
-        test_loss /= num_batches
-
-        return test_loss
+                test_losses += losses 
+                
+        return test_losses / num_batches
         
     def _train(self, dataloader: torch.utils.data.DataLoader):
         """Train the model for one epoch.
@@ -116,15 +119,17 @@ class TrainerCenterNet:
         for e in range(epochs):
             self._train(train_loader)
            
-            train_loss = self.evaluate(train_loader)
-            train_losses[e] = train_loss
+            tr_loss, tr_focal_loss, tr_push_loss, tr_pull_loss, tr_reg_loss = self.evaluate(train_loader)
+            train_losses[e] = tr_loss
             
             saved = ""
             if keep_best:
-                saved = "---> Saved" if save_model(self.model, train_loss) else ""
-            
-            print(f"Epoch {e + 1}/{epochs}, Train loss: {train_loss:.4f} {saved}")
+                saved = "---> Saved" if save_model(self.model, tr_loss) else ""
                 
+            print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_loss:.4f}, "
+                  f"Train focal loss: {tr_focal_loss:.4f}, Train push loss: {tr_push_loss:.4f}, "
+                  f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f} {saved}")
+            
         if keep_best:
             self.model.load_state_dict(torch.load(path_best_model))
             self.model = self.model.to(self.device)
