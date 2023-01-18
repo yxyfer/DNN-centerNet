@@ -1,6 +1,7 @@
 # DNN-centerNet
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![HitCount](https://hits.dwyl.com/yxyfer/DNN-centerNet.svg?style=flat-square)](http://hits.dwyl.com/yxyfer/DNN-centerNet)
 
 ![alt text](images/image.png "Mnist Detection example")
 
