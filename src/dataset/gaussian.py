@@ -1,53 +1,63 @@
-#######################################
-# Gaussian functions
-# This code comes from:
-# https://github.com/zzzxxxttt/pytorch_simple_CenterNet_47/blob/master/utils/image.py
-#######################################
-
 import numpy as np
 
-def gaussian_2d(shape, sigma=1):
-  m, n = [(ss - 1.) / 2. for ss in shape]
-  y, x = np.ogrid[-m:m + 1, -n:n + 1]
 
-  h = np.exp(-(x * x + y * y) / (2 * sigma * sigma))
-  h[h < np.finfo(h.dtype).eps * h.max()] = 0
-  return h
+def gaussian_2d(shape: tuple, sigma: float = 1) -> np.ndarray:
+    """Generate gaussian map.
+    Args:
+        shape (tuple): Shape of the gaussian map (Height, width).
+        sigma (float, optional): Sigma of the gaussian. Defaults to 1.
+        
+    Returns:
+        np.ndarray: Gaussian map of shape (Height, width).
+    """
+    
+    m, n = (shape[0] - 1.) / 2., (shape[1] - 1.) / 2.
+    x, y = np.meshgrid(np.linspace(-n, n, shape[1]), np.linspace(-m, m, shape[0]))
+    
+    h = np.exp(-(x**2 + y**2) / (2*sigma**2))
+    return h
 
-def draw_gaussian(heatmap, center, radius, k=1, delta=6):
-  diameter = 2 * radius + 1
-  gaussian = gaussian_2d((diameter, diameter), sigma=diameter / delta)
 
-  x, y = center
+def draw_gaussian(heatmap: np.array, center: tuple, radius: float, k: int = 1, delta: int = 6):
+    """"Add a 2D gaussian function to a given heatmap.
+    
+    Args:
+        heatmap (ndarray): The heatmap to which the gaussian function will be added.
+        center (tuple of int): The (x, y) coordinates of the center of the gaussian function.
+        radius (float): The radius of the gaussian function.
+        k (float): The scaling factor for the gaussian function.
+        delta (float): The standard deviation of the gaussian function.
+    """
+    diameter = 2 * radius + 1
+    gaussian = gaussian_2d((diameter, diameter), sigma=diameter / delta)
 
-  height, width = heatmap.shape[0:2]
+    x, y = center
 
-  left, right = min(x, radius), min(width - x, radius + 1)
-  top, bottom = min(y, radius), min(height - y, radius + 1)
+    left, right = max(x - radius, 0), min(x + radius + 1, heatmap.shape[1])
+    top, bottom = max(y - radius, 0), min(y + radius + 1, heatmap.shape[0])
 
-  masked_heatmap = heatmap[y - top:y + bottom, x - left:x + right]
-  masked_gaussian = gaussian[radius - top:radius + bottom, radius - left:radius + right]
-  np.maximum(masked_heatmap, masked_gaussian * k, out=masked_heatmap)
+    heatmap[top:bottom, left:right] = np.maximum(heatmap[top:bottom, left:right], gaussian[:bottom-top, :right-left] * k)
 
-def gaussian_radius(det_size, min_overlap):
-  height, width = det_size
 
-  a1 = 1
-  b1 = (height + width)
-  c1 = width * height * (1 - min_overlap) / (1 + min_overlap)
-  sq1 = np.sqrt(b1 ** 2 - 4 * a1 * c1)
-  r1 = (b1 - sq1) / (2 * a1)
+def gaussian_radius(det_size: tuple, min_overlap: float) -> float:
+    """Get radius of gaussian.
 
-  a2 = 4
-  b2 = 2 * (height + width)
-  c2 = (1 - min_overlap) * width * height
-  sq2 = np.sqrt(b2 ** 2 - 4 * a2 * c2)
-  r2 = (b2 - sq2) / (2 * a2)
+    Args:
+        det_size (tuple): (Height, Width)
+        min_overlap (float): Minimum overlap. Value between 0 and 1.
 
-  a3 = 4 * min_overlap
-  b3 = -2 * min_overlap * (height + width)
-  c3 = (min_overlap - 1) * width * height
-  sq3 = np.sqrt(b3 ** 2 - 4 * a3 * c3)
-  r3 = (b3 + sq3) / (2 * a3)
-  
-  return min(r1, r2, r3)
+    Returns:
+        Float: Radius of gaussian.
+    """
+    height, width = det_size
+
+    sum_hw = height + width
+    mul_hw = height * width
+
+    r1 = (sum_hw - np.sqrt(sum_hw ** 2 - 4 * mul_hw * (1 - min_overlap) / (1 + min_overlap))) / 2
+
+    r2 = (sum_hw - np.sqrt(sum_hw ** 2 - 4 * mul_hw * (1 - min_overlap))) / 4
+
+    r3 = (-sum_hw * min_overlap + np.sqrt((sum_hw * min_overlap) ** 2 - 4 * mul_hw * (min_overlap - 1) * min_overlap)) / (4 * min_overlap)
+
+    return min(r1, r2, r3)
