@@ -64,6 +64,31 @@ python train_center_net.py [-h] [--name NAME] [--epochs EPOCHS] [--dataset DATAS
 - *--dataset* option allows you to specify the dataset to use for training. Default is *data/mnist_detection*
 - *--batch_size* option allows you to specify the batch size for training. Default is 8
 
+**remark**:
+The *--dataset* argument must be a folder having the following structure:
+```bash
+dataset/
+|--- train/
+|    |--- images/
+|         |--- 0.png
+|         |--- 1.png
+|         |--- 2.png
+|         |--- ...
+|    |--- labels/
+|         |--- 0.txt
+|         |--- 1.txt
+|         |--- 2.txt
+|         |--- ...
+|--- test/
+|    |--- images/
+|         |--- 0.png
+|         |--- 1.png
+|         |--- ...
+|    |--- labels/
+|         |--- 0.txt
+|         |--- 1.txt
+|         |--- ...
+```
 
 Finally, you can test the model on an image using the following command:
 
