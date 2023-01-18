@@ -1,7 +1,6 @@
 # DNN-centerNet
 
-![alt text](images/image1.png "Mnist Detection example 1")
-![alt text](images/image2.png "Mnist Detection example 2")
+![alt text](images/image.png "Mnist Detection example")
 
 ## Introduction
 
