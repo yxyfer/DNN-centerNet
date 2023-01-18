@@ -6,10 +6,8 @@ import torch
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save", type=bool, default=True,
-                        help="Whether to save the model or not")
     parser.add_argument("--name", type=str, default="backbone_model.pth",
-                        help="Name of the model to save")
+                        help="Name of the model to save. Default backbone_model.pth")
     
     return parser.parse_args()
 
@@ -30,6 +28,5 @@ if __name__ == '__main__':
     print("Training Backbone model...")    
     vals = trainer.train(train_dataloader, test_dataloader, epochs=20)
 
-    if args.save:
-        trainer.save(f"models/{args.name}")
+    trainer.save(f"models/{args.name}")
     

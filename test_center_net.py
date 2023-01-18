@@ -43,7 +43,7 @@ def pred(model, image):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("image", help="Path to image")
-    parser.add_argument("--filter", help="Filter the bbox. Default True", action="store_true")
+    parser.add_argument("--nfilter", help="To not filter the bbox. Default False", action="store_false")
     
     args = parser.parse_args()
     image = np.array(Image.open(args.image), dtype=np.float32)
@@ -57,4 +57,4 @@ if __name__ == "__main__":
     
     image = image.transpose((1, 2, 0))
      
-    display_bbox(image, dets, filter=args.filter)
+    display_bbox(image, dets, filter=args.nfilter)

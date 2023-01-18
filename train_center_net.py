@@ -9,16 +9,14 @@ import torch
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--save", type=bool, default=True,
-                        help="Whether to save the model or not. Default: True")
     parser.add_argument("--name", type=str, default="center_net_model.pth",
                         help="Name of the model to save. Default: center_net_model.pth")
     parser.add_argument("--epochs", type=int, default=20,
                         help="Number of epochs to train the model. Default: 20")
     parser.add_argument("--dataset", type=str, default="data/mnist_detection",
                         help="Path to the dataset. Default: data/mnist_detection")
-    parser.add_argument("--batch_size", type=int, default=4,
-                        help="Batch size. Default: 4")
+    parser.add_argument("--batch_size", type=int, default=8,
+                        help="Batch size. Default: 8")
     
     return parser.parse_args()
 
@@ -39,5 +37,4 @@ if __name__ == '__main__':
     print("Training CenterNet model...")
     vals = trainer.train(train_loader, epochs=args.epochs)
     
-    if args.save:
-        trainer.save(f"models/{args.name}")
+    trainer.save(f"models/{args.name}")
