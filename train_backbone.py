@@ -26,7 +26,7 @@ if __name__ == '__main__':
     trainer = TrainerBackbone(model, optimizer, loss, device)
 
     print("Training Backbone model...")    
-    vals = trainer.train(train_dataloader, test_dataloader, epochs=20)
+    vals = trainer.train(train_dataloader, test_dataloader, epochs=20, keep_best=True)
 
     trainer.save(f"models/{args.name}")
     

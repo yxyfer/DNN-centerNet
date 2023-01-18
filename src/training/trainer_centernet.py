@@ -1,4 +1,5 @@
 import torch
+from .saver import SaveBestModel
 
 
 class TrainerCenterNet:
@@ -94,6 +95,8 @@ class TrainerCenterNet:
     def train(self,
               train_loader: torch.utils.data.DataLoader,
               epochs: int = 10,
+              keep_best: bool = False,
+              path_best_model: str = "best_model.pth"
               ) -> list:
         """Train the model for a given number of epochs.
         
@@ -108,13 +111,23 @@ class TrainerCenterNet:
         """
         train_losses = [0] * epochs
         
+        save_model = SaveBestModel(path_best_model, float('inf'), lambda b, v: v < b)
+        
         for e in range(epochs):
             self._train(train_loader)
            
             train_loss = self.evaluate(train_loader)
             train_losses[e] = train_loss
             
-            print(f"Epoch {e + 1}/{epochs}, Train loss: {train_loss:.4f}")
+            saved = ""
+            if keep_best:
+                saved = "---> Saved" if save_model(self.model, train_loss) else ""
+            
+            print(f"Epoch {e + 1}/{epochs}, Train loss: {train_loss:.4f} {saved}")
+                
+        if keep_best:
+            self.model.load_state_dict(torch.load(path_best_model))
+            self.model = self.model.to(self.device)
 
         return train_losses
-            
+ 

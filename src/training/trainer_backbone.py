@@ -107,7 +107,7 @@ class TrainerBackbone:
         test_losses = [0] * epochs
         test_accuracies = [0] * epochs
         
-        save_model = SaveBestModel(path_best_model)
+        save_model = SaveBestModel(path_best_model, 0, lambda b, v: v > b)
         
         for e in range(epochs):
             self._train(train_loader)

@@ -35,6 +35,6 @@ if __name__ == '__main__':
     trainer = TrainerCenterNet(model, optimizer, loss, device)
 
     print("Training CenterNet model...")
-    vals = trainer.train(train_loader, epochs=args.epochs)
+    vals = trainer.train(train_loader, epochs=args.epochs, keep_best=True)
     
     trainer.save(f"models/{args.name}")
