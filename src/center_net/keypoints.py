@@ -245,8 +245,9 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
                     classe = dets[0, j, -1]
                     detections_centers.append(np.array([*bbox, *cent, score, classe]))
                     break
-        
-    return np.array(detections_centers)
+    
+    detections_centers = np.array(detections_centers)
+    return detections_centers[detections_centers[:, 6].argsort()[::-1][:len(detections_centers)]] 
 
 def rescale_detection(detections: np.array,
                       ratios: np.array = np.array([[0.25, 0.25]]),
