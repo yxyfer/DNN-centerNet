@@ -42,6 +42,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--minscore", default=0.2, type=float, help="Minimum score for the bbox. Default 0.2"
     )
+    parser.add_argument(
+        "--center", action="store_true", help="To display the centers. Default False"
+    )
 
     args = parser.parse_args()
 
@@ -57,4 +60,6 @@ if __name__ == "__main__":
 
     img = image.transpose((1, 2, 0))
 
-    display_bbox(img, detections, filter=args.nfilter, min_score=args.minscore)
+    display_bbox(img, detections,
+                 filter=args.nfilter, min_score=args.minscore,
+                 plot_center=args.center)
