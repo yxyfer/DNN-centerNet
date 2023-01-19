@@ -43,7 +43,7 @@ class IoU(object):
 
     def get_values(self, box):
         # return np.array([[box[0], box[1]], [box[2], box[3]]])
-        return np.array([get_bbox(box)[:5]])
+        return np.array([get_bbox(box)[:4]])
 
     def pre_process(self):
         self.y_hat = self.get_values(self.y_hat)
