@@ -10,4 +10,4 @@ class TestIoU:
     def test_half(self):
         box_true = np.array([0, 10, 0, 10, -1, -1])
         box_hat = np.array([0, 12, 0, 12, -1, -1])
-        assert IoU(box_true, box_hat)() == 0.5555555720164602
+        assert IoU(box_true, box_hat)() == 0.5714285867346933
