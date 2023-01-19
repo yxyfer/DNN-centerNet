@@ -5,10 +5,12 @@ from PIL import Image
 
 from src.center_net.keypoints import decode, filter_detections, rescale_detection
 from src.center_net.network import CenterNet
-from src.helpers import display_bbox
+from src.helpers import display_bbox, get_image
 
 
-def decode_ouputs(outputs: list, K: int = 70, num_dets: int = 1000, n: int = 5) -> np.array:
+def decode_ouputs(
+    outputs: list, K: int = 70, num_dets: int = 1000, n: int = 5
+) -> np.array:
     """From outputs of the model, decode the detections and centers
 
     Args:
@@ -19,11 +21,11 @@ def decode_ouputs(outputs: list, K: int = 70, num_dets: int = 1000, n: int = 5) 
     Returns:
         np.array: Decoded detections and centers (bbox, class)
     """
-     
+
     detections, centers = decode(*outputs, K, 3, 0.5, num_dets=num_dets)
     detections = filter_detections(detections[0], centers[0], n=n)
     detections = rescale_detection(detections)
-        
+
     return detections
 
 
@@ -40,7 +42,10 @@ if __name__ == "__main__":
         "--nfilter", help="To not filter the bbox. Default False", action="store_false"
     )
     parser.add_argument(
-        "--minscore", default=0.1, type=float, help="Minimum score for the bbox. Default 0.1"
+        "--minscore",
+        default=0.1,
+        type=float,
+        help="Minimum score for the bbox. Default 0.1",
     )
     parser.add_argument(
         "--center", action="store_true", help="To display the centers. Default False"
@@ -50,16 +55,18 @@ if __name__ == "__main__":
 
     model = CenterNet()
     model.load_state_dict(torch.load("models/center_net_model.pth"))
-    
-    image = np.array(Image.open(args.image), dtype=np.float32)
-    image = image / 255.0
-    image = np.expand_dims(image, axis=0)
+
+    image = get_image(args.image)
 
     output = pred(model, torch.from_numpy(image).unsqueeze(0).float())
     detections = decode_ouputs(output)
 
     img = image.transpose((1, 2, 0))
 
-    display_bbox(img, detections,
-                 filter=args.nfilter, min_score=args.minscore,
-                 plot_center=args.center)
+    display_bbox(
+        img,
+        detections,
+        filter=args.nfilter,
+        min_score=args.minscore,
+        plot_center=args.center,
+    )
