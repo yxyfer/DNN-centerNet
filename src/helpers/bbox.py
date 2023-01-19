@@ -7,7 +7,7 @@ colors = ["blue", "green", "cyan", "red", "yellow", "magenta", "peru", "azure", 
 colors = [plt.cm.colors.to_rgb(c) for c in colors]
 
 def display_bbox(image: np.array, bbox: np.array, print_result: bool = False,
-                 filter: bool = True, min_score: float = 0.2):
+                 filter: bool = True, min_score: float = 0.3, plot_center: bool = False):
     """Plot the bounding boxes on the image.
 
     Args:
@@ -16,30 +16,29 @@ def display_bbox(image: np.array, bbox: np.array, print_result: bool = False,
         print_result (bool, optional): Print the result?. Defaults to False.
         filter (bool, optional): Filter the bounding boxes?. Defaults to True.
         min_score (float, optional): Minimum score to filter. Defaults to 0.2.
+        plot_center (bool, optional): Plot the center of the bounding box?. Defaults to False.
     """
 
     image = image.copy()
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     thick = int((300 + 300) // 900)
     
-    box = []
-
     for b in bbox:
-        x1, y1, x2, y2 = b[:4]
-        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+        x1, y1, x2, y2, cx, cy = b[:6]
+        x1, y1, x2, y2, cx, cy = int(x1), int(y1), int(x2), int(y2), int(cx), int(cy)
         color = colors[int(b[-1])]
-        
-        
-        if filter and (((x1, y1, x2, y2) in box) or b[4] < min_score):
+         
+        if filter and b[6] < min_score:
             continue
         
-        box.append((x1, y1, x2, y2))
-        
         if print_result:
-            print(f"bbox: {x1, y1, x2, y2}, class: {int(b[-1])}, score: {b[4]}")
+            print(f"bbox: {x1, y1, x2, y2}, class: {int(b[-1])}, score: {b[6]}")
         
         cv2.rectangle(image, (x1, y1), (x2, y2), color, thick)
-        cv2.putText(image, str(int(b[-1])), (x1, y1 - 3), 0, 1e-3 * 300, color, thick//3)
+        cv2.putText(image, str(int(b[-1])), (x1, y1 - 3), 0, 1e-3 * 300, color, thick // 3)
+        
+        if plot_center:
+            cv2.circle(image, (cx, cy), 2, color, thickness=-1)
     
     plt.figure(figsize=(8, 8)) 
     plt.imshow(image)

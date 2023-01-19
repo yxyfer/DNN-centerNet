@@ -3,39 +3,34 @@ import argparse
 import torch
 from PIL import Image
 
-from src.center_net.utils import decode, center_match, _rescale_dets
+from src.center_net.keypoints import decode, filter_detections, rescale_detection
 from src.center_net.network import CenterNet
 from src.helpers import display_bbox
 
 
-def decode_ouputs(outputs: list) -> list:
+def decode_ouputs(outputs: list, K: int = 70, num_dets: int = 1000, n: int = 5) -> np.array:
     """From outputs of the model, decode the detections and centers
 
     Args:
         outputs (list): Outputs of the model
-
+        K (int, optional): Number of centers. Defaults to 70.
+        num_dets (int, optional): Number of detections. Defaults to 100.
+        n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
     Returns:
-        list: Decoded detections and centers (bbox, class)
+        np.array: Decoded detections and centers (bbox, class)
     """
-
-    dets, cts = decode(*outputs, K=70, ae_threshold=0.5, kernel=3, num_dets=1000)
-
-    dets = dets.detach().numpy()
-    cts = cts.detach().numpy()
-
-    borders = np.array([[0.0, 300.0, 0.0, 300.0]])
-    ratios = np.array([[0.25, 0.25]])
-    sizes = np.array([[300, 300]])
-
-    _rescale_dets(dets, cts, ratios, borders, sizes)
-    return center_match(dets[0], cts[0])
+     
+    detections, centers = decode(*outputs, K, 3, 0.5, num_dets=num_dets)
+    detections = filter_detections(detections[0], centers[0], n=n)
+    detections = rescale_detection(detections)
+        
+    return detections
 
 
 def pred(model, image):
     model.eval()
     with torch.no_grad():
-        output = model(image)[0]
-        return decode_ouputs(output)
+        return model(image)[0]
 
 
 if __name__ == "__main__":
@@ -44,17 +39,27 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nfilter", help="To not filter the bbox. Default False", action="store_false"
     )
+    parser.add_argument(
+        "--minscore", default=0.2, type=float, help="Minimum score for the bbox. Default 0.2"
+    )
+    parser.add_argument(
+        "--center", action="store_true", help="To display the centers. Default False"
+    )
 
     args = parser.parse_args()
+
+    model = CenterNet()
+    model.load_state_dict(torch.load("models/center_net_model.pth"))
+    
     image = np.array(Image.open(args.image), dtype=np.float32)
     image = image / 255.0
     image = np.expand_dims(image, axis=0)
 
-    model = CenterNet()
-    model.load_state_dict(torch.load("models/center_net_model.pth"))
+    output = pred(model, torch.from_numpy(image).unsqueeze(0).float())
+    detections = decode_ouputs(output)
 
-    dets, cts = pred(model, torch.from_numpy(image).unsqueeze(0).float())
+    img = image.transpose((1, 2, 0))
 
-    image = image.transpose((1, 2, 0))
-
-    display_bbox(image, dets, filter=args.nfilter)
+    display_bbox(img, detections,
+                 filter=args.nfilter, min_score=args.minscore,
+                 plot_center=args.center)
