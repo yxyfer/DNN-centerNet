@@ -103,10 +103,10 @@ dataset/
 Finally, you can test the model on an image using the following command:
 
 ```bash
-python tester_center_net.py [-h] [--nfilter] [--minscore MINSCORE] image
+python tester_center_net.py [-h] [--nfilter] [--minscore MINSCORE] [--center] image
 ```
 
 - _--nfilter_ option allows you to not filter the bounding boxes.
-- _--minscore_ option allows you to specify the minimum score for a bounding box to be displayed. Default is 0.2
+- _--minscore_ option allows you to specify the minimum score for a bounding box to be displayed. Default is 0.1
 - _center_ option allows you to plot the center of the bounding box. Default is False.
 - _image_ argument is the path to the image to test.

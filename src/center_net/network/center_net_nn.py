@@ -13,10 +13,9 @@ class CenterNet(nn.Module):
         
         self.post = nn.Sequential(
             Convolution(64, 128),
-            Convolution(128, 128),
-            Convolution(128, 128),
-            Convolution(128, 128),
-            Convolution(128, 128),
+            Residual(128, 128),
+            Residual(128, 128),
+            Residual(128, 128),
         )
         
         self.cascade_tl_pool = CascadeTLCornerPooling(128, 128)
