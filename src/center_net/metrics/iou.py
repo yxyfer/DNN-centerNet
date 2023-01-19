@@ -1,5 +1,7 @@
 import numpy as np
 
+from src.helpers.bbox import get_bbox
+
 
 class IoU(object):
     """This is an IoU calculator
@@ -40,7 +42,8 @@ class IoU(object):
         return self._iou != other
 
     def get_values(self, box):
-        return np.array([[box[0], box[1]], [box[2], box[3]]])
+        # return np.array([[box[0], box[1]], [box[2], box[3]]])
+        return np.array([get_bbox(box)[:5]])
 
     def pre_process(self):
         self.y_hat = self.get_values(self.y_hat)

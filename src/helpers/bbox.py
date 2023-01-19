@@ -20,10 +20,14 @@ colors = [plt.cm.colors.to_rgb(c) for c in colors]
 
 
 def get_bbox(bbox):
-    x1, y1, x2, y2, cx, cy = bbox[:6]
-    x1, y1, x2, y2, cx, cy = int(x1), int(y1), int(x2), int(y2), int(cx), int(cy)
+    if len(bbox) > 5:
+        x1, y1, x2, y2, cx, cy = bbox[:6]
+        x1, y1, x2, y2, cx, cy = int(x1), int(y1), int(x2), int(y2), int(cx), int(cy)
 
-    return x1, y1, x2, y2, cx, cy
+        return x1, y1, x2, y2, cx, cy
+    else:
+        x1, y1, x2, y2 = bbox
+        return x1, y1, x2, y2, -1, -1
 
 
 def get_image(image_path: str):
