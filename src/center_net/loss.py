@@ -1,7 +1,7 @@
 from torch import nn
 import torch
 from torch.nn import functional as F
-from .utils import _tranpose_and_gather_feature
+from .keypoints import tranpose_and_gather_feature
 
 
 class CenterNetLoss(nn.Module):
@@ -82,11 +82,11 @@ class CenterNetLoss(nn.Module):
     def forward(self, outputs, batch, full=False):
         hmap_tl, hmap_br, hmap_ct, embd_tl, embd_br, regs_tl, regs_br, regs_ct = zip(*outputs)
         
-        embd_tl = [_tranpose_and_gather_feature(e, batch['inds_tl']) for e in embd_tl]
-        embd_br = [_tranpose_and_gather_feature(e, batch['inds_br']) for e in embd_br]
-        regs_tl = [_tranpose_and_gather_feature(r, batch['inds_tl']) for r in regs_tl]
-        regs_br = [_tranpose_and_gather_feature(r, batch['inds_br']) for r in regs_br]
-        regs_ct = [_tranpose_and_gather_feature(r, batch['inds_ct']) for r in regs_ct]
+        embd_tl = [tranpose_and_gather_feature(e, batch['inds_tl']) for e in embd_tl]
+        embd_br = [tranpose_and_gather_feature(e, batch['inds_br']) for e in embd_br]
+        regs_tl = [tranpose_and_gather_feature(r, batch['inds_tl']) for r in regs_tl]
+        regs_br = [tranpose_and_gather_feature(r, batch['inds_br']) for r in regs_br]
+        regs_ct = [tranpose_and_gather_feature(r, batch['inds_ct']) for r in regs_ct]
         
         focal_loss = self.focal_loss(hmap_tl, batch['hmap_tl']) + \
                      self.focal_loss(hmap_br, batch['hmap_br']) + \

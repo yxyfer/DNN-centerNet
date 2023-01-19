@@ -75,7 +75,7 @@ def _gather_feat(feat: torch.Tensor, ind: torch.Tensor, mask: Optional[torch.Ten
         feat = feat[mask].view(-1, dim)
     return feat
 
-def _tranpose_and_gather_feature(feature: torch.Tensor, ind: torch.Tensor) -> torch.Tensor:
+def tranpose_and_gather_feature(feature: torch.Tensor, ind: torch.Tensor) -> torch.Tensor:
     """
     Perform a transpose operation on a 4D tensor "feature" followed
     by gathering specific subset of features based on the indices in a 2D tensor "ind".
@@ -121,9 +121,9 @@ def decode(hmap_tl, hmap_br, hmap_ct,
     ys_ct = ys_ct.view(batch, 1, K).expand(batch, K, K)
 
     if regs_tl is not None and regs_br is not None:
-        regs_tl = _tranpose_and_gather_feature(regs_tl, inds_tl)
-        regs_br = _tranpose_and_gather_feature(regs_br, inds_br)
-        regs_ct = _tranpose_and_gather_feature(regs_ct, inds_ct)
+        regs_tl = tranpose_and_gather_feature(regs_tl, inds_tl)
+        regs_br = tranpose_and_gather_feature(regs_br, inds_br)
+        regs_ct = tranpose_and_gather_feature(regs_ct, inds_ct)
         regs_tl = regs_tl.view(batch, K, 1, 2)
         regs_br = regs_br.view(batch, 1, K, 2)
         regs_ct = regs_ct.view(batch, 1, K, 2)
@@ -138,8 +138,8 @@ def decode(hmap_tl, hmap_br, hmap_ct,
     # all possible boxes based on top k corners (ignoring class)
     bboxes = torch.stack((xs_tl, ys_tl, xs_br, ys_br), dim=3)
 
-    embd_tl = _tranpose_and_gather_feature(embd_tl, inds_tl)
-    embd_br = _tranpose_and_gather_feature(embd_br, inds_br)
+    embd_tl = tranpose_and_gather_feature(embd_tl, inds_tl)
+    embd_br = tranpose_and_gather_feature(embd_br, inds_br)
     embd_tl = embd_tl.view(batch, K, 1)
     embd_br = embd_br.view(batch, 1, K)
     dists = torch.abs(embd_tl - embd_br)
@@ -188,7 +188,7 @@ def decode(hmap_tl, hmap_br, hmap_ct,
 
     return detections, center
 
-def bbox_center(detection: np.array, n: int = 3) -> np.array:
+def _bbox_center(detection: np.array, n: int = 3) -> np.array:
     """Calculate the bounding box for the center keypoint
 
     Args:
@@ -234,7 +234,7 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
         dets = dets[None, :, :]
         cets = cets[None, :, :]
 
-        ct_bb = bbox_center(dets, n)
+        ct_bb = _bbox_center(dets, n)
         
         for i in range(cets.shape[1]):
             for j in range(ct_bb.shape[1]):
