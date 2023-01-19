@@ -7,7 +7,7 @@ colors = ["blue", "green", "cyan", "red", "yellow", "magenta", "peru", "azure", 
 colors = [plt.cm.colors.to_rgb(c) for c in colors]
 
 def display_bbox(image: np.array, bbox: np.array, print_result: bool = False,
-                 filter: bool = True, min_score: float = 0.2):
+                 filter: bool = True, min_score: float = 0.3):
     """Plot the bounding boxes on the image.
 
     Args:
