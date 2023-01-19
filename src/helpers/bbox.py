@@ -22,18 +22,13 @@ def display_bbox(image: np.array, bbox: np.array, print_result: bool = False,
     image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
     thick = int((300 + 300) // 900)
     
-    box = []
-
     for b in bbox:
         x1, y1, x2, y2 = b[:4]
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         color = colors[int(b[-1])]
-        
-        
-        if filter and (((x1, y1, x2, y2) in box) or b[6] < min_score):
+         
+        if filter and b[6] < min_score:
             continue
-        
-        box.append((x1, y1, x2, y2))
         
         if print_result:
             print(f"bbox: {x1, y1, x2, y2}, class: {int(b[-1])}, score: {b[6]}")
