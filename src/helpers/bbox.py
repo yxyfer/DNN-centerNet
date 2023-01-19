@@ -30,13 +30,13 @@ def display_bbox(image: np.array, bbox: np.array, print_result: bool = False,
         color = colors[int(b[-1])]
         
         
-        if filter and (((x1, y1, x2, y2) in box) or b[4] < min_score):
+        if filter and (((x1, y1, x2, y2) in box) or b[6] < min_score):
             continue
         
         box.append((x1, y1, x2, y2))
         
         if print_result:
-            print(f"bbox: {x1, y1, x2, y2}, class: {int(b[-1])}, score: {b[4]}")
+            print(f"bbox: {x1, y1, x2, y2}, class: {int(b[-1])}, score: {b[6]}")
         
         cv2.rectangle(image, (x1, y1), (x2, y2), color, thick)
         cv2.putText(image, str(int(b[-1])), (x1, y1 - 3), 0, 1e-3 * 300, color, thick//3)
