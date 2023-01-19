@@ -146,7 +146,7 @@ def decode(hmap_tl, hmap_br, hmap_ct,
 
     scores_tl = scores_tl.view(batch, K, 1).expand(batch, K, K)
     scores_br = scores_br.view(batch, 1, K).expand(batch, K, K)
-    scores = (scores_tl + scores_br) / 2
+    scores = (scores_tl + scores_br) / 3
 
     # reject boxes based on classes
     clses_tl = clses_tl.view(batch, K, 1).expand(batch, K, K)
@@ -214,7 +214,7 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
 
     Args:
         detections (torch.Tensor): Tensor of shape (num_detections, 8) containing: (x1, y1, x2, y2, score, scoretl, scorebr, class)
-        centers (torch.Tensor): Tensor of shape (num_centers, 4) containing: (x, y, score, class)
+        centers (torch.Tensor): Tensor of shape (num_centers, 4) containing: (x, y, class, score)
         n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 3.
 
     Returns:
@@ -241,7 +241,7 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
                 if (cets[0, i, 0] >= ct_bb[0, j, 0]) and (cets[0, i, 0] <= ct_bb[0, j, 2]) and (cets[0, i, 1] >= ct_bb[0, j, 1]) and (cets[0, i, 1] <= ct_bb[0, j, 3]):
                     bbox = dets[:, j, :4][0]
                     cent = cets[:, i, :2][0]
-                    score = dets[0, j, 4]
+                    score = dets[0, j, 4] + cets[0, i, 3] / 3
                     classe = dets[0, j, -1]
                     detections_centers.append(np.array([*bbox, *cent, score, classe]))
                     break
