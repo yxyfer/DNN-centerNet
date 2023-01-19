@@ -43,9 +43,9 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--minscore",
-        default=0.2,
+        default=0.1,
         type=float,
-        help="Minimum score for the bbox. Default 0.2",
+        help="Minimum score for the bbox. Default 0.1",
     )
     parser.add_argument(
         "--center", action="store_true", help="To display the centers. Default False"

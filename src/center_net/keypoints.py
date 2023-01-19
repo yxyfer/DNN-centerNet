@@ -188,12 +188,12 @@ def decode(hmap_tl, hmap_br, hmap_ct,
 
     return detections, center
 
-def _bbox_center(detection: np.array, n: int = 3) -> np.array:
+def _bbox_center(detection: np.array, n: int = 5) -> np.array:
     """Calculate the bounding box for the center keypoint
 
     Args:
         detection (np.array): Detection array containing the top left and bottom right coordinates
-        n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 3.
+        n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
 
     Returns:
         np.array: Array containing the top left and bottom right coordinates of the central region
@@ -208,14 +208,14 @@ def _bbox_center(detection: np.array, n: int = 3) -> np.array:
     return array
 
 
-def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 3) -> np.array:
+def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 5) -> np.array:
     """Filter and combine bounding box detections and their corresponding
     centers by checking if the centers fall within the center of the bounding boxes.
 
     Args:
         detections (torch.Tensor): Tensor of shape (num_detections, 8) containing: (x1, y1, x2, y2, score, scoretl, scorebr, class)
         centers (torch.Tensor): Tensor of shape (num_centers, 4) containing: (x, y, class, score)
-        n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 3.
+        n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
 
     Returns:
         np.array: A 2D array representing the filtered detections with centers.
