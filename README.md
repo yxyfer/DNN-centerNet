@@ -8,7 +8,7 @@
 
 ## Introduction
 
-This project is a re-implementation of CenterNet in PyTorch for detecting digits in the Mnist Detection dataset. To complete this project, we relied on the paper ["CenterNet: Keypoint Triplets for Object Detection"](https://arxiv.org/pdf/1904.08189.pdf) as well as the following GitHubs: https://github.com/Duankaiwen/CenterNet and https://github.com/zzzxxxttt/pytorch_simple_CenterNet_47.
+This project is a re-implementation of CenterNet in PyTorch for detecting digits in the Mnist Detection dataset. To complete this project, we relied on the paper ["CenterNet: Keypoint Triplets for Object Detection"](https://arxiv.org/pdf/1904.08189.pdf) as well as the following GitHubs: [CenterNet's Repository](https://github.com/Duankaiwen/CenterNet) and [zzzxxxttt's implementation of centerNet](https://github.com/zzzxxxttt/pytorch_simple_CenterNet_47).
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ python setup_gpu.py install --user
 
 ### Dataset
 
-The dataset used for this project is the Mnist Detection dataset. It can be downloaded using this project: https://github.com/hukkelas/MNIST-ObjectDetection
+The dataset used for this project is the Mnist Detection dataset. It can be downloaded using this project: [MNIST-ObjectDetection](https://github.com/hukkelas/MNIST-ObjectDetection)
 
 For this project we used the following command to generate the dataset:
 
