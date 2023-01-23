@@ -88,27 +88,19 @@ class AP:
         fd = np.ones(y_hat.shape[0])
         ap = 0
         
+        iou = np.zeros((y_true.shape[0], y_hat.shape[0]))
         for i in range(y_true.shape[0]):
-            best_iou = 0
-            best_index = None
-            
             for j in range(y_hat.shape[0]):
                 if y_true[i, 4] == y_hat[j, 7]:
-                    iou = self.perform_iou(y_true[i, :4].astype('int32').reshape(1, 4),
-                                           y_hat[j, :4].astype('int32').reshape(1, 4))
-                    
-                    if iou > best_iou:
-                        best_iou = iou
-                        best_index = j
-                        
-            ap += best_iou
-            if best_index is not None:
-                fd[best_index] = 0
-                
-        if y_hat.shape[0] == 0:
-            fd_rate = 0
-        else:
-            fd_rate = fd.sum() / y_hat.shape[0]
-            
-        return ap / y_true.shape[0], fd_rate
+                    iou[i, j] = self.perform_iou(y_true[i, :4].astype('int32').reshape(1, 4),
+                                                 y_hat[j, :4].astype('int32').reshape(1, 4))
+
+        if not np.any(iou):
+            return 0, 0
+        
+        best_index = np.argmax(iou, axis=1)
+        ap = np.mean(iou[np.arange(y_true.shape[0]), best_index])
+        fd[best_index] = 0
+        
+        return ap, np.mean(fd) 
     
