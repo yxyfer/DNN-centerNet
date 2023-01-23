@@ -1,6 +1,8 @@
 import torch
 from .saver import SaveBestModel
 import numpy as np
+from ..center_net.metrics import AP
+from ..center_net.keypoints import decode, filter_detections, rescale_detection
 
 
 class TrainerCenterNet:
@@ -39,19 +41,30 @@ class TrainerCenterNet:
         batch['ind_masks'] = batch['ind_masks'].to(self.device)
         
         
-    def evaluate(self, dataloader: torch.utils.data.DataLoader) -> np.array:
+    def evaluate(self, dataloader: torch.utils.data.DataLoader,
+                 score: float = 0.1, K: int = 70, num_dets: int = 1000, n: int = 5) -> np.array:
         """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
-        
+            score (float): Minimum score to consider a detection. Defaults to 0.1.
+            K (int, optional): Number of centers. Defaults to 70.
+            num_dets (int, optional): Number of detections. Defaults to 1000.
+            n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
+             
         Returns:
             np.array: Losses for each loss function. [loss, focal_loss, push_loss, pull_loss, reg_loss]
         """
         
         num_batches = len(dataloader)
+        metric_ap = AP(min_score=score)
+        
         self.model.eval()
         
         test_losses = np.array([0, 0, 0, 0, 0], dtype=np.float64)
+
+        ap = 0
+        fd = 0
+        size = 0
         
         with torch.no_grad():
             for batch in dataloader:
@@ -62,8 +75,28 @@ class TrainerCenterNet:
                 losses = np.array([l.item() for l in losses])
                 
                 test_losses += losses 
+
+                detections, centers = decode(*outputs[0], K, 3, 0.5, num_dets=num_dets)
+                detections = detections.to('cpu')
+                centers = centers.to('cpu')
                 
-        return test_losses / num_batches
+                y = batch['bbox'].numpy()
+                
+                for i in range(len(batch['image'])):
+                    det = filter_detections(detections[i], centers[i], n=n)
+
+                    if len(det) == 0:
+                        continue
+                    
+                    det = rescale_detection(det)
+                    
+                    ap_l, fd_l = metric_ap.calculate(y[i], det)
+                    ap += ap_l
+                    fd += fd_l
+                
+                size += len(batch['image'])
+                
+        return test_losses / num_batches, ap / size, fd / size
         
     def _train(self, dataloader: torch.utils.data.DataLoader):
         """Train the model for one epoch.
@@ -121,24 +154,35 @@ class TrainerCenterNet:
         
         for e in range(epochs):
             self._train(train_loader)
-           
-            tr_loss, tr_focal_loss, tr_push_loss, tr_pull_loss, tr_reg_loss = self.evaluate(train_loader)
-            te_loss, te_focal_loss, te_push_loss, te_pull_loss, te_reg_loss = self.evaluate(test_loader)
 
-            train_losses[e] = tr_loss
-            test_losses[e] = te_loss
+            tr_losses, tr_ap, tr_fd = self.evaluate(train_loader)
+            te_losses, te_ap, te_fd = self.evaluate(test_loader)
+            
+            train_losses[e] = tr_losses[0]
+            test_losses[e] = te_losses[0]
+           
+            # tr_loss, tr_focal_loss, tr_push_loss, tr_pull_loss, tr_reg_loss = self.evaluate(train_loader)
+            # te_loss, te_focal_loss, te_push_loss, te_pull_loss, te_reg_loss = self.evaluate(test_loader)
+
+            # train_losses[e] = tr_loss
+            # test_losses[e] = te_loss
             
             saved = ""
             if keep_best:
-                saved = "---> Saved" if save_model(self.model, te_loss) else ""
+                saved = "---> Saved" if save_model(self.model, te_losses[0]) else ""
                 
-            print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_loss:.4f}, "
-                  f"Train focal loss: {tr_focal_loss:.4f}, Train push loss: {tr_push_loss:.4f}, "
-                  f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f}")
+            print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_losses[0]:.4f}, "
+                  f"Train AP: {tr_ap:.4f}, Train FD: {tr_fd:.4f} | "
+                  f"Test loss: {te_losses[0]:.4f}, "
+                  f"Test AP: {te_ap:.4f}, Test FD: {te_fd:.4f} {saved}\n")
+            
+            # print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_loss:.4f}, "
+            #       f"Train focal loss: {tr_focal_loss:.4f}, Train push loss: {tr_push_loss:.4f}, "
+            #       f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f}")
 
-            print(f"Epoch {e + 1}/{epochs}, Test loss: {te_loss:.4f}, "
-                  f"Test focal loss: {te_focal_loss:.4f}, Test push loss: {te_push_loss:.4f}, "
-                  f"Test pull loss: {te_pull_loss:.4f}, Test reg loss: {te_reg_loss:.4f} {saved}\n")
+            # print(f"Epoch {e + 1}/{epochs}, Test loss: {te_loss:.4f}, "
+            #       f"Test focal loss: {te_focal_loss:.4f}, Test push loss: {te_push_loss:.4f}, "
+            #       f"Test pull loss: {te_pull_loss:.4f}, Test reg loss: {te_reg_loss:.4f} {saved}\n")
             
         if keep_best:
             self.model.load_state_dict(torch.load(path_best_model))

@@ -23,8 +23,8 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     
-    dataset_train = MnistDetection(args.dataset, train=True)
-    dataset_test = MnistDetection(args.dataset, train=False)
+    dataset_train = MnistDetection(args.dataset, train=True, max_images=3)
+    dataset_test = MnistDetection(args.dataset, train=False, max_images=3)
     
     train_loader = torch.utils.data.DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True) 
     test_loader = torch.utils.data.DataLoader(dataset_test, batch_size=args.batch_size, shuffle=True) 

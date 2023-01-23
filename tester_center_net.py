@@ -16,7 +16,7 @@ def decode_ouputs(
     Args:
         outputs (list): Outputs of the model
         K (int, optional): Number of centers. Defaults to 70.
-        num_dets (int, optional): Number of detections. Defaults to 100.
+        num_dets (int, optional): Number of detections. Defaults to 1000.
         n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
     Returns:
         np.array: Decoded detections and centers (bbox, class)

@@ -1,5 +1,6 @@
-from .iou import IoU
+from .iou import IoU, AP
 
 __all__ = [
-    'IoU'
+    'IoU',
+    'AP'
 ]
