@@ -9,7 +9,7 @@ from .gaussian import gaussian_radius, draw_gaussian
 
 class MnistDetection(Dataset):
     num_classes = 10
-    max_objects = 15
+    max_objects = 30
     
     classes = [
         "0 - zero",
@@ -165,7 +165,7 @@ class MnistDetection(Dataset):
         
         bboxes = np.concatenate((bboxes, np.expand_dims(labels, axis=1)), axis=1)
         
-        full_bbox = np.zeros((15, 5))
+        full_bbox = np.zeros((max_objects, 5))
         
         for i, bbox in enumerate(bboxes):
             full_bbox[i] = bbox
