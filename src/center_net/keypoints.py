@@ -246,6 +246,9 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
                     detections_centers.append(np.array([*bbox, *cent, score, classe]))
                     break
     
+    if len(detections_centers) == 0:
+        return np.array([])
+    
     detections_centers = np.array(detections_centers)
     detections_centers = detections_centers[detections_centers[:, 6].argsort()[::-1]]
 

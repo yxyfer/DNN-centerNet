@@ -10,6 +10,15 @@
 
 This project is a re-implementation of CenterNet in PyTorch for detecting digits in the Mnist Detection dataset. To complete this project, we relied on the paper ["CenterNet: Keypoint Triplets for Object Detection"](https://arxiv.org/pdf/1904.08189.pdf) as well as the following GitHubs: [CenterNet's Repository](https://github.com/Duankaiwen/CenterNet) and [zzzxxxttt's implementation of centerNet](https://github.com/zzzxxxttt/pytorch_simple_CenterNet_47).
 
+
+
+To train this model, we first trained a backbone to classify the digits of the MNIST dataset. With the pre-trained backbone, we then trained the CenterNet model for 90 epochs (took ~2h30). The training was done using the MNIST Detection dataset with images of size 300x300 that can contain up to 30 digits per image. The final results of the training are as follows:
+
+| | AP | FD |
+| --- | --- | --- |
+| Train | 97.56% | 7.84% |
+| Test | 85.65% | 10.78% |
+
 ## Prerequisites
 
 ### Corner Pooling Layers
