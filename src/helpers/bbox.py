@@ -42,8 +42,8 @@ def display_bbox(
     image: np.array,
     bbox: np.array,
     print_result: bool = False,
-    min_score: float = 0.2,
     plot_center: bool = False,
+    min_global_score: float = 0.1,
 ):
     """Plot the bounding boxes on the image.
 
@@ -51,8 +51,8 @@ def display_bbox(
         image (np.array): Image to plot.
         bbox (np.array): Bounding boxes to plot.
         print_result (bool, optional): Print the result?. Defaults to False.
-        min_score (float, optional): Minimum score to filter. Defaults to 0.2.
         plot_center (bool, optional): Plot the center of the bounding box?. Defaults to False.
+        min_global_score (float, optional): Minimum score to filter. Defaults to 0.1.
     """
 
     image = image.copy()
@@ -63,7 +63,7 @@ def display_bbox(
         x1, y1, x2, y2, cx, cy = get_bbox(b)
         color = colors[int(b[-1])]
 
-        if b[6] < min_score:
+        if b[6] < min_global_score:
             continue
 
         if print_result:

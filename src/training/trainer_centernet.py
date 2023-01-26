@@ -42,13 +42,13 @@ class TrainerCenterNet:
         
         
     def evaluate(self, dataloader: torch.utils.data.DataLoader,
-                 score: float = 0.1, K: int = 70, num_dets: int = 1000, n: int = 5) -> np.array:
+                 score: float = 0.05, K: int = 70, num_dets: int = 500, n: int = 5) -> np.array:
         """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
-            score (float): Minimum score to consider a detection. Defaults to 0.1.
+            score (float): Minimum score to consider a detection. Defaults to 0.05.
             K (int, optional): Number of centers. Defaults to 70.
-            num_dets (int, optional): Number of detections. Defaults to 1000.
+            num_dets (int, optional): Number of detections. Defaults to 500.
             n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
              
         Returns:
@@ -56,7 +56,7 @@ class TrainerCenterNet:
         """
         
         num_batches = len(dataloader)
-        metric_ap = AP(min_score=score)
+        metric_ap = AP(min_score=0)
         
         self.model.eval()
         
@@ -83,7 +83,7 @@ class TrainerCenterNet:
                 y = batch['bbox'].numpy()
                 
                 for i in range(len(batch['image'])):
-                    det = filter_detections(detections[i], centers[i], n=n)
+                    det = filter_detections(detections[i], centers[i], n=n, min_score=score)
 
                     if len(det) == 0:
                         continue
