@@ -37,11 +37,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("image", help="Path to image")
     parser.add_argument(
-        "--nfilter", help="To not filter the bbox. Default False", action="store_false"
-    )
-    parser.add_argument(
         "--minscore",
-        default=0.1,
+        default=0.2,
         type=float,
         help="Minimum score for the bbox. Default 0.1",
     )
@@ -74,7 +71,6 @@ if __name__ == "__main__":
     display_bbox(
         img,
         detections,
-        filter=args.nfilter,
         min_score=args.minscore,
         plot_center=args.center,
     )
