@@ -14,10 +14,10 @@ This project is a re-implementation of CenterNet in PyTorch for detecting digits
 
 To train this model, we first trained a backbone to classify the digits of the MNIST dataset. With the pre-trained backbone, we then trained the CenterNet model for 90 epochs (took ~2h30). The training was done using the MNIST Detection dataset with images of size 300x300 that can contain up to 30 digits per image. The final results of the training are as follows:
 
-| | AP | FD |
-| --- | --- | --- |
-| Train | 97.56% | 7.84% |
-| Test | 85.65% | 10.78% |
+|       | AP     | FD     |
+| ----- | ------ | ------ |
+| Train | 97.56% | 7.84%  |
+| Test  | 85.65% | 10.78% |
 
 ## Prerequisites
 
@@ -32,13 +32,11 @@ cd <DNN-centerNet dir>/src/center_net/cpools_/
 ```
 
 If you want to use a CPU version, run the following command:
-
 ```bash
 python setup_cpu.py install --user
 ```
 
 If you want to use a GPU version, run the following command:
-
 ```bash
 python setup_gpu.py install --user
 ```
@@ -50,7 +48,7 @@ The dataset used for this project is the Mnist Detection dataset. It can be down
 For this project we used the following command to generate the dataset:
 
 ```bash
- python generate_data.py --max-digits-per-image 15 --imsize 300
+ python generate_data.py --max-digits-per-image 30 --imsize 300
 ```
 
 ## Usage
@@ -62,25 +60,34 @@ All models are saved in the folder: _models_.
 ### Backbone
 
 A model of the backbone is already trained and available, however you can retrain it using the following command:
-
 ```bash
-python train_backbone.py [-h] [--name NAME]
+python train_backbone.py [OPTIONS]
 ```
+The command has several options that can be used to modify the behavior of the training process:
 
-- _--name_ option allows you to specify the filename to save the model. Default is _backbone_model.pth_.
+- _--name NAME_: This option sets the name of the model that will be saved at the end of the training. The default name is "backbone_model.pth"
+- _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 20.
+- _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 64.
+- _--keep_best KEEP_BEST_: This option determines whether the best performing model will be saved during the training. By default, this option is set to true, which means that the best model will be saved.
 
 ### CenterNet
 
 Similarly, a trained CenterNet model is also available, however you can retrain it using the following command:
-
 ```bash
-python train_center_net.py [-h] [--name NAME] [--epochs EPOCHS] [--dataset DATASET] [--batch_size BATCH_SIZE]
+python train_center_net.py [OPTIONS]
 ```
+The command has several options that can be used to modify the behavior of the training process:
 
-- _--name_ option allows you to specify the filename to save the model. Default is _center_net_model.pth_
-- _--epochs_ option allows you to specify the number of training epochs. Default is 20
-- _--dataset_ option allows you to specify the dataset to use for training. Default is _data/mnist_detection_
-- _--batch_size_ option allows you to specify the batch size for training. Default is 8
+- _--name NAME_: This option sets the name of the model that will be saved at the end of the training. The default name is "center_net_model.pth"
+- _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 90.
+- _--dataset DATASET_: This option sets the path to the dataset that will be used for training the model. The default path is "data/mnist_detection".
+- _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 8.
+- _--keep_best KEEP_BEST_: This option determines whether the best performing model will be saved during the training. By default, this option is set to true, which means that the best model will be saved.
+- _--max_objects MAX_OBJECTS_: This option sets the maximum number of objects that can be present in an image. The default value for this option is 30.
+- _--max_images_train MAX_IMAGES_TRAIN_: This option sets the maximum number of images that will be used for training. The default value for this option is 700.
+- _--max_images_test MAX_IMAGES_TEST_: This option sets the maximum number of images that will be used for testing. The default value for this option is 200.
+- _--pretrained_backbone PRETRAINED_BACKBONE_: This option sets the path to the pre-trained backbone model that will be used for training the center-net model. If set to 'none', no pre-trained model will be loaded. The default path is "models/backbone_model.pth".
+
 
 **remark**:
 The _--dataset_ argument must be a folder having the following structure:
