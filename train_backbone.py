@@ -12,8 +12,8 @@ def parse_args():
                         help="Number of epochs to train the model. Default: 20")
     parser.add_argument("--batch_size", type=int, default=64,
                         help="Batch size. Default: 64")
-    parser.add_argument("--keep_best", type=bool, default=True,
-                        help="Keep the best model. Default: True")
+    parser.add_argument("--keep_best", action="store_true",
+                        help="Keep the best model during training")
     
     return parser.parse_args()
 

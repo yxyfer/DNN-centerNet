@@ -68,7 +68,7 @@ The command has several options that can be used to modify the behavior of the t
 - _--name NAME_: This option sets the name of the model that will be saved at the end of the training. The default name is "backbone_model.pth"
 - _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 20.
 - _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 64.
-- _--keep_best KEEP_BEST_: This option determines whether the best performing model will be saved during the training. By default, this option is set to true, which means that the best model will be saved.
+- _--keep_best_: This option determines whether the best performing model will be saved during the training. By default, this option is set to false, which means that the best model will not be saved.
 
 ### CenterNet
 
@@ -82,7 +82,7 @@ The command has several options that can be used to modify the behavior of the t
 - _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 90.
 - _--dataset DATASET_: This option sets the path to the dataset that will be used for training the model. The default path is "data/mnist_detection".
 - _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 8.
-- _--keep_best KEEP_BEST_: This option determines whether the best performing model will be saved during the training. By default, this option is set to true, which means that the best model will be saved.
+- _--keep_best_: This option determines whether the best performing model will be saved during the training. By default, this option is set to false, which means that the best model will not be saved.
 - _--max_objects MAX_OBJECTS_: This option sets the maximum number of objects that can be present in an image. The default value for this option is 30.
 - _--max_images_train MAX_IMAGES_TRAIN_: This option sets the maximum number of images that will be used for training. The default value for this option is 700.
 - _--max_images_test MAX_IMAGES_TEST_: This option sets the maximum number of images that will be used for testing. The default value for this option is 200.

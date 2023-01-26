@@ -17,8 +17,8 @@ def parse_args():
                         help="Path to the dataset. Default: data/mnist_detection")
     parser.add_argument("--batch_size", type=int, default=8,
                         help="Batch size. Default: 8")
-    parser.add_argument("--keep_best", type=bool, default=True,
-                        help="Keep the best model. Default: True")
+    parser.add_argument("--keep_best", action="store_true",
+                        help="Keep the best model during the training")
     parser.add_argument("--max_objects", type=int, default=30,
                         help="Maximum number of objects in an image. Default: 30")
     parser.add_argument("--max_images_train", type=int, default=700,
