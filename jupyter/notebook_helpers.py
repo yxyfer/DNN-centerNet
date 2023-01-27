@@ -57,7 +57,7 @@ class NotebookHelpers:
             axis=1,
         )
 
-    def _predict(self, image, K=70, num_dets=1000, n=3):
+    def _predict(self, image, K=70, num_dets=1000, n=5):
         self.model.eval()
         with torch.no_grad():
             outs = self.model(image)[0]
@@ -68,7 +68,7 @@ class NotebookHelpers:
 
             detections = rescale_detection(detections)
 
-            return detections
+            return np.array(detections)
 
     def _load_model(self):
         self.model = CenterNet()
