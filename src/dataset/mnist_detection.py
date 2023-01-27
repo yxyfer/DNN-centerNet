@@ -86,6 +86,9 @@ class MnistDetection(Dataset):
         
         # -- Add resize --
         # -- Add data augmentation --
+
+        image, labels, bboxes = self._augment(image, labels, bboxes)
+
         
         image = image.astype(np.float32) / 255.
         image = image.transpose((2, 0, 1))  # [H, W, C] to [C, H, W]
@@ -170,3 +173,58 @@ class MnistDetection(Dataset):
     
     def __len__(self):
         return self.num_samples
+
+    def _augment(self, image, labels, bboxes):
+
+        def _get_rotation():
+            return random.randint(-45,45)
+
+        def _scale(angle, width):
+            angle = abs(angle*math.pi/180)
+            new_w = width * math.cos(angle) + width*math.sin(angle)
+            return width / new_w
+        
+        def _rotate_xy(x,y,M):
+            res = M @ np.array([x,y,1]).T
+            return (int(res[1]),int(res[0]))
+
+        def _get_new_box(i, M):
+            box = [None, None, None, None]
+
+            #top left
+            res = _rotate_xy(i[0], i[1], M)
+            dst[res[0], res[1]] = 137
+            box[0] = res[1]
+            
+            #btm right
+            res = _rotate_xy(i[2], i[3], M)
+            dst[res[0], res[1]] = 137
+            box[2] = res[1]
+            
+            #top right
+            res = _rotate_xy(i[2], i[1], M)
+            dst[res[0], res[1]] = 137
+            box[1] = res[0]
+            
+            #btm left
+            res = _rotate_xy(i[0], i[3], M)
+            dst[res[0], res[1]] = 137
+            box[3] = res[0]
+
+            return box
+
+        size = image.shape[0]
+        angle = _get_rotation()
+        coef = _scale(angle, size)
+
+
+        M = cv2.getRotationMatrix2D(((size-1)/2.0,(size-1)/2.0),angle,coef)
+        dst = cv2.warpAffine(image,M,(size,size), cv2.WARP_FILL_OUTLIERS)
+        dst = dst.reshape((size,size, 1))
+        new_bboxes = []
+
+        for b in bboxes:
+            new_bboxes.append(_get_new_box(b,M))
+        new_bboxes = np.array(new_bboxes)
+
+        return dst, labels, new_bboxes
