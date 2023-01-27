@@ -6,10 +6,16 @@ from .layers import HeatMapLayer, EmbeddingLayer, OffsetLayer
 from ...backbone import load_backbone_model
 
 class CenterNet(nn.Module):
-    def __init__(self):
+    def __init__(self, pretrained_model: str = "models/backbone_model.pth"):
+        """Initialize CenterNet model.
+
+        Args:
+            pretrained_model (str, optional): Path to the pretrained model. Defaults to "models/backbone_model.pth".
+        """
+        
         super(CenterNet, self).__init__()
 
-        self.backbone = load_backbone_model("models/backbone_model.pth")
+        self.backbone = load_backbone_model(pretrained_model)
         
         self.post = nn.Sequential(
             Convolution(64, 128),

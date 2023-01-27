@@ -8,12 +8,14 @@ def load_backbone_model(model_path: str, remove_last_layer: int = 2) -> nn.Seque
     Args:
         model_path (str): Path to the pretrained model.
         remove_last_layer (int): Number of layer to remove. Defaults to 2.
+        pretrained (bool, optional): Use a pretrained backbone. Defaults to True.
     
     Returns:
         nn.Sequential: Loaded model.
     """
     
     model = BackboneNetwork()
-    model.load_state_dict(torch.load(model_path))
+    if model_path != 'none':
+        model.load_state_dict(torch.load(model_path))
     
     return nn.Sequential(*list(model.network.children())[:-remove_last_layer])

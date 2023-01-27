@@ -14,10 +14,10 @@ This project is a re-implementation of CenterNet in PyTorch for detecting digits
 
 To train this model, we first trained a backbone to classify the digits of the MNIST dataset. With the pre-trained backbone, we then trained the CenterNet model for 90 epochs (took ~2h30). The training was done using the MNIST Detection dataset with images of size 300x300 that can contain up to 30 digits per image. The final results of the training are as follows:
 
-| | AP | FD |
-| --- | --- | --- |
-| Train | 97.56% | 7.84% |
-| Test | 85.65% | 10.78% |
+|       | AP     | FD    |
+| ----- | ------ | ----- |
+| Train | 97.53% | 1.81% |
+| Test  | 84.85% | 5.86% |
 
 ## Prerequisites
 
@@ -32,13 +32,11 @@ cd <DNN-centerNet dir>/src/center_net/cpools_/
 ```
 
 If you want to use a CPU version, run the following command:
-
 ```bash
 python setup_cpu.py install --user
 ```
 
 If you want to use a GPU version, run the following command:
-
 ```bash
 python setup_gpu.py install --user
 ```
@@ -50,7 +48,7 @@ The dataset used for this project is the Mnist Detection dataset. It can be down
 For this project we used the following command to generate the dataset:
 
 ```bash
- python generate_data.py --max-digits-per-image 15 --imsize 300
+ python generate_data.py --max-digits-per-image 30 --imsize 300
 ```
 
 ## Usage
@@ -62,25 +60,34 @@ All models are saved in the folder: _models_.
 ### Backbone
 
 A model of the backbone is already trained and available, however you can retrain it using the following command:
-
 ```bash
-python train_backbone.py [-h] [--name NAME]
+python train_backbone.py [OPTIONS]
 ```
+The command has several options that can be used to modify the behavior of the training process:
 
-- _--name_ option allows you to specify the filename to save the model. Default is _backbone_model.pth_.
+- _--name NAME_: This option sets the name of the model that will be saved at the end of the training. The default name is "backbone_model.pth"
+- _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 20.
+- _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 64.
+- _--keep_best_: This option determines whether the best performing model will be saved during the training. By default, this option is set to false, which means that the best model will not be saved.
 
 ### CenterNet
 
 Similarly, a trained CenterNet model is also available, however you can retrain it using the following command:
-
 ```bash
-python train_center_net.py [-h] [--name NAME] [--epochs EPOCHS] [--dataset DATASET] [--batch_size BATCH_SIZE]
+python train_center_net.py [OPTIONS]
 ```
+The command has several options that can be used to modify the behavior of the training process:
 
-- _--name_ option allows you to specify the filename to save the model. Default is _center_net_model.pth_
-- _--epochs_ option allows you to specify the number of training epochs. Default is 20
-- _--dataset_ option allows you to specify the dataset to use for training. Default is _data/mnist_detection_
-- _--batch_size_ option allows you to specify the batch size for training. Default is 8
+- _--name NAME_: This option sets the name of the model that will be saved at the end of the training. The default name is "center_net_model.pth"
+- _--epochs EPOCHS_: This option sets the number of epochs for which the model will be trained. The default value for this option is 90.
+- _--dataset DATASET_: This option sets the path to the dataset that will be used for training the model. The default path is "data/mnist_detection".
+- _--batch_size BATCH_SIZE_: This option sets the batch size that will be used during training. The default value for this option is 8.
+- _--keep_best_: This option determines whether the best performing model will be saved during the training. By default, this option is set to false, which means that the best model will not be saved.
+- _--max_objects MAX_OBJECTS_: This option sets the maximum number of objects that can be present in an image. The default value for this option is 30.
+- _--max_images_train MAX_IMAGES_TRAIN_: This option sets the maximum number of images that will be used for training. The default value for this option is 700.
+- _--max_images_test MAX_IMAGES_TEST_: This option sets the maximum number of images that will be used for testing. The default value for this option is 200.
+- _--pretrained_backbone PRETRAINED_BACKBONE_: This option sets the path to the pre-trained backbone model that will be used for training the center-net model. If set to 'none', no pre-trained model will be loaded. The default path is "models/backbone_model.pth".
+
 
 **remark**:
 The _--dataset_ argument must be a folder having the following structure:
@@ -109,13 +116,18 @@ dataset/
 |         |--- ...
 ```
 
-Finally, you can test the model on an image using the following command:
-
+To test the model on an image, you can use the following command:
 ```bash
-python tester_center_net.py [-h] [--nfilter] [--minscore MINSCORE] [--center] image
+python tester_center_net.py [OPTIONS] image
 ```
+The command has several options that can be used to modify the behavior of the model during testing: 
 
-- _--nfilter_ option allows you to not filter the bounding boxes.
-- _--minscore_ option allows you to specify the minimum score for a bounding box to be displayed. Default is 0.1
-- _center_ option allows you to plot the center of the bounding box. Default is False.
-- _image_ argument is the path to the image to test.
+- _--min_global_score MIN_GLOBAL_SCORE_ : This option sets the minimum score for plotting the bounding boxes. The default value for this option is 0.
+- _--min_score MIN_SCORE_ : This option sets the minimum score for a detection to be considered. The default value for this option is 0.05.
+- _--not_use_center_ : This option determines whether the center region will be used for filtering the detections. By default, this option is set to False, which means that the center region will be used
+- _--center_ : This option is used to display the centers of the bounding boxes in the output image. By default, this option is set to False, which means that the centers will not be displayed.
+- _--K K_ : This option sets the number of centers that will be detected by the model. The default value for this option is 70.
+- _--num_dets NUM_DETS_ : This option sets the number of detections that will be generated by the model. The default value for this option is 500.
+- _--n N_ : This option sets the scale of the central region. The value of N must be an odd number and can be either 3 or 5. The default value for this option is 5.
+- _--model MODEL_ : This option sets the path to the trained model that will be used for testing. The default path is models/center_net_model.pth
+- _image_: This argument represents the path to the image that will be used.

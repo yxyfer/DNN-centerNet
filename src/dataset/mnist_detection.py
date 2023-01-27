@@ -9,20 +9,6 @@ from .gaussian import gaussian_radius, draw_gaussian
 
 class MnistDetection(Dataset):
     num_classes = 10
-    max_objects = 30
-    
-    classes = [
-        "0 - zero",
-        "1 - one",
-        "2 - two",
-        "3 - three",
-        "4 - four",
-        "5 - five",
-        "6 - six",
-        "7 - seven",
-        "8 - eight",
-        "9 - nine",
-    ]
     
     train_path = "/train/"
     test_path = "/test/"
@@ -32,23 +18,24 @@ class MnistDetection(Dataset):
     gaussian_iou = 0.6
     
     def __init__(self, data_dir: str, train: bool = True, img_shape: tuple = (1, 300, 300),
-                 max_images: int = 500):
+                 max_images: int = None, max_objects: int = 30):
         """Create a dataset for the MNIST detection.
 
         Args:
             data_dir (str): Path to the dataset.
             train (bool, optional): Train dataset?. Defaults to True.
             img_size (tuple, optional): Shape of an Image (C, H, W). Defaults to (1, 300, 300).
-            max_images (int, optional): Max number of images to load. Defaults to 500.
+            max_images (int, optional): Max number of images to load. Defaults to None = all.
         """
         
         self.train = train
         self.img_shape = img_shape
         self.max_images = max_images
         self.feature_map_size = {
-            'h': 75,
-            'w': 75,
+            'h': img_shape[1] // 4,
+            'w': img_shape[2] // 4,
         }
+        self.max_objects = max_objects
         
         if train:
             data_dir = data_dir + MnistDetection.train_path
@@ -69,6 +56,8 @@ class MnistDetection(Dataset):
         label_files = os.listdir(labels_path)
         label_files = [i for i in label_files if i.endswith(".txt")]
         label_files.sort()
+        
+        self.max_images = self.max_images or len(image_files)
         
         image_files = image_files[:self.max_images]
         label_files = label_files[:self.max_images]
@@ -104,7 +93,7 @@ class MnistDetection(Dataset):
         num_classes = MnistDetection.num_classes
         fmap_size_h = self.feature_map_size['h']
         fmap_size_w = self.feature_map_size['w']
-        max_objects = MnistDetection.max_objects
+        max_objects = self.max_objects
         
         heat_map_tl = np.zeros((num_classes, fmap_size_h, fmap_size_w), dtype=np.float32)
         heat_map_br = np.zeros((num_classes, fmap_size_h, fmap_size_w), dtype=np.float32)

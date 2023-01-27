@@ -98,8 +98,8 @@ def tranpose_and_gather_feature(feature: torch.Tensor, ind: torch.Tensor) -> tor
 def decode(hmap_tl, hmap_br, hmap_ct,
            embd_tl, embd_br,
            regs_tl, regs_br, regs_ct,
-           K, kernel, ae_threshold, num_dets=1000):
-    batch, _, _, width = hmap_tl.shape
+           K, kernel, ae_threshold, num_dets=500):
+    batch, _, _, _ = hmap_tl.shape
 
     hmap_tl = torch.sigmoid(hmap_tl)
     hmap_br = torch.sigmoid(hmap_br)
@@ -146,7 +146,7 @@ def decode(hmap_tl, hmap_br, hmap_ct,
 
     scores_tl = scores_tl.view(batch, K, 1).expand(batch, K, K)
     scores_br = scores_br.view(batch, 1, K).expand(batch, K, K)
-    scores = (scores_tl + scores_br) / 3
+    scores = (scores_tl + scores_br) / 2
 
     # reject boxes based on classes
     clses_tl = clses_tl.view(batch, K, 1).expand(batch, K, K)
@@ -208,7 +208,8 @@ def _bbox_center(detection: np.array, n: int = 5) -> np.array:
     return array
 
 
-def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 5) -> np.array:
+def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 5,
+                      use_center: bool = True, min_score: int = 0.05) -> np.array:
     """Filter and combine bounding box detections and their corresponding
     centers by checking if the centers fall within the center of the bounding boxes.
 
@@ -216,41 +217,47 @@ def filter_detections(detections: torch.Tensor, centers: torch.Tensor, n: int = 
         detections (torch.Tensor): Tensor of shape (num_detections, 8) containing: (x1, y1, x2, y2, score, scoretl, scorebr, class)
         centers (torch.Tensor): Tensor of shape (num_centers, 4) containing: (x, y, class, score)
         n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
-
+        use_center (bool, optional): Whether to use the center keypoint or not. Defaults to True.
+        min_score (int, optional): Minimum score for a detection to be considered. Defaults to 0.1.
+        
     Returns:
         np.array: A 2D array representing the filtered detections with centers.
         Contains: (tlx, tly, brx, bry, cx, cy, score, class)
     """
     
+    detections = detections[np.where(detections[:, 4] > min_score)]
+    centers = centers[np.where(centers[:, 3] > min_score)]
+
+    if not use_center:
+        ct_bb = _bbox_center(detections[None, :, :], n)
+        return np.hstack((detections[:, :4], ct_bb[:, :, :2][0], detections[:, 4:5], detections[:, -1:]))
+    
     detections_centers = []
     
     for classe in range(10):
-        dets = detections[np.where((detections[:, -1] == classe) & (detections[:, 4] >0))]
+        dets = detections[np.where((detections[:, -1] == classe))]
         cets = centers[np.where(centers[:, 2] == classe)]
         
         if (len(dets) == 0) or (len(cets) == 0):
             continue
         
-        dets = dets[None, :, :]
-        cets = cets[None, :, :]
-
-        ct_bb = _bbox_center(dets, n)
+        ct_bb = _bbox_center(dets[None, :, :], n)
         
-        for i in range(cets.shape[1]):
+        for i in range(cets.shape[0]):
             for j in range(ct_bb.shape[1]):
-                if (cets[0, i, 0] >= ct_bb[0, j, 0]) and (cets[0, i, 0] <= ct_bb[0, j, 2]) and (cets[0, i, 1] >= ct_bb[0, j, 1]) and (cets[0, i, 1] <= ct_bb[0, j, 3]):
-                    bbox = dets[:, j, :4][0]
-                    cent = cets[:, i, :2][0]
-                    score = dets[0, j, 4] + cets[0, i, 3] / 3
-                    classe = dets[0, j, -1]
+                if (ct_bb[0, j, 0] < cets[i, 0] < ct_bb[0, j, 2]) and\
+                   (ct_bb[0, j, 1] < cets[i, 1] < ct_bb[0, j, 3]):
+                    bbox = dets[j, :4]
+                    cent = cets[i, :2]
+                    score = dets[j, 4] * 2 / 3 + cets[i, 3] / 3
+                    classe = dets[j, -1]
                     detections_centers.append(np.array([*bbox, *cent, score, classe]))
                     break
-    
-    if len(detections_centers) == 0:
-        return np.array([])
-    
+
     detections_centers = np.array(detections_centers)
-    detections_centers = detections_centers[detections_centers[:, 6].argsort()[::-1]]
+    
+    if len(detections_centers) != 0:
+        detections_centers = detections_centers[detections_centers[:, 6].argsort()[::-1]]
 
     return detections_centers
 
@@ -267,6 +274,9 @@ def rescale_detection(detections: np.array,
         borders (np.array, optional): Borders used to rescale the image
         sizes (np.array, optional): Size of the original image
     """
+
+    if len(detections) == 0:
+        return detections
     
     xs = detections[..., 0:6:2]
     ys = detections[..., 1:6:2]

@@ -42,13 +42,13 @@ class TrainerCenterNet:
         
         
     def evaluate(self, dataloader: torch.utils.data.DataLoader,
-                 score: float = 0.1, K: int = 70, num_dets: int = 1000, n: int = 5) -> np.array:
+                 score: float = 0.05, K: int = 70, num_dets: int = 500, n: int = 5) -> np.array:
         """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
-            score (float): Minimum score to consider a detection. Defaults to 0.1.
+            score (float): Minimum score to consider a detection. Defaults to 0.05.
             K (int, optional): Number of centers. Defaults to 70.
-            num_dets (int, optional): Number of detections. Defaults to 1000.
+            num_dets (int, optional): Number of detections. Defaults to 500.
             n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
              
         Returns:
@@ -56,7 +56,7 @@ class TrainerCenterNet:
         """
         
         num_batches = len(dataloader)
-        metric_ap = AP(min_score=score)
+        metric_ap = AP(min_score=0)
         
         self.model.eval()
         
@@ -83,7 +83,7 @@ class TrainerCenterNet:
                 y = batch['bbox'].numpy()
                 
                 for i in range(len(batch['image'])):
-                    det = filter_detections(detections[i], centers[i], n=n)
+                    det = filter_detections(detections[i], centers[i], n=n, min_score=score)
 
                     if len(det) == 0:
                         continue
@@ -161,28 +161,14 @@ class TrainerCenterNet:
             train_losses[e] = tr_losses[0]
             test_losses[e] = te_losses[0]
            
-            # tr_loss, tr_focal_loss, tr_push_loss, tr_pull_loss, tr_reg_loss = self.evaluate(train_loader)
-            # te_loss, te_focal_loss, te_push_loss, te_pull_loss, te_reg_loss = self.evaluate(test_loader)
-
-            # train_losses[e] = tr_loss
-            # test_losses[e] = te_loss
-            
             saved = ""
             if keep_best:
-                saved = "---> Saved" if save_model(self.model, te_losses[0]) else ""
+                saved = "---> Saved" if save_model(self.model, te_fd) else ""
                 
             print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_losses[0]:.4f}, "
                   f"Train AP: {tr_ap:.4f}, Train FD: {tr_fd:.4f} | "
                   f"Test loss: {te_losses[0]:.4f}, "
                   f"Test AP: {te_ap:.4f}, Test FD: {te_fd:.4f} {saved}\n")
-            
-            # print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_loss:.4f}, "
-            #       f"Train focal loss: {tr_focal_loss:.4f}, Train push loss: {tr_push_loss:.4f}, "
-            #       f"Train pull loss: {tr_pull_loss:.4f}, Train reg loss: {tr_reg_loss:.4f}")
-
-            # print(f"Epoch {e + 1}/{epochs}, Test loss: {te_loss:.4f}, "
-            #       f"Test focal loss: {te_focal_loss:.4f}, Test push loss: {te_push_loss:.4f}, "
-            #       f"Test pull loss: {te_pull_loss:.4f}, Test reg loss: {te_reg_loss:.4f} {saved}\n")
             
         if keep_best:
             self.model.load_state_dict(torch.load(path_best_model))
