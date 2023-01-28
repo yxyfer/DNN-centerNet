@@ -73,6 +73,18 @@ class AP:
     
     def calculare_ap_fd(self, y_true: np.array, y_hat: np.array, ious: np.array,
                         thresholds: list = [0.05, 0.5, 0.75, 0.95]) -> dict:
+        """Calculate the average precision and false discovery rate for a given threshold
+        
+        Args:
+            y_true (np.array): Ground truth of shape (N, 5) | (tlx, tly, brx, bry, class)
+            y_hat (np.array): Calculated values of shape (M, 8) | (tlx, tly, brx, bry, cx, cy, score, class)
+            ious (np.array): IoU values of shape (N, M)
+            thresholds (list, optional): List of thresholds to calculate the AP and FD. Defaults to [0.05, 0.5, 0.75, 0.95].
+            
+        Returns:
+            dict: Dictionary containing the AP and FD for each threshold
+        """
+        
         dic = {}
         
         for threshold in thresholds:
