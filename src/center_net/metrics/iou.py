@@ -16,15 +16,6 @@ class IoU(object):
         y_hat  (_type_): _description_
     """
 
-    def get_bounding_box(self, coords):
-        """Returns the fours coords of a bounding box
-
-        Args:
-            coords (np.array): contains the top-left and bottom-right corner
-            points.
-        """
-        x1, y1, x2, y2 = coords
-
     def __init__(self, y_true, y_hat):
         self.y_true = y_true
         self.y_hat = y_hat
@@ -42,7 +33,6 @@ class IoU(object):
         return self._iou != other
 
     def get_values(self, box):
-        # return np.array([[box[0], box[1]], [box[2], box[3]]])
         return np.array([get_bbox(box)[:4]])
 
     def pre_process(self):
