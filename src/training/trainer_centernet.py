@@ -42,7 +42,8 @@ class TrainerCenterNet:
         
         
     def evaluate(self, dataloader: torch.utils.data.DataLoader,
-                 score: float = 0.05, K: int = 70, num_dets: int = 500, n: int = 5) -> np.array:
+                 score: float = 0.05, K: int = 70, num_dets: int = 500, n: int = 5,
+                 thresholds: list = [0.05, 0.5, 0.75, 0.95]) -> np.array:
         """Compute the loss for a given dataloader.
         Args:
             dataloader (torch.utils.data.DataLoader): Dataloader to use.
@@ -50,6 +51,7 @@ class TrainerCenterNet:
             K (int, optional): Number of centers. Defaults to 70.
             num_dets (int, optional): Number of detections. Defaults to 500.
             n (int, optional): Odd number 3 or 5. Determines the scale of the central region. Defaults to 5.
+            thresholds (list, optional): List of thresholds to compute the AP. Defaults to [0.05, 0.5, 0.75, 0.95].
              
         Returns:
             np.array: Losses for each loss function. [loss, focal_loss, push_loss, pull_loss, reg_loss]
@@ -62,8 +64,12 @@ class TrainerCenterNet:
         
         test_losses = np.array([0, 0, 0, 0, 0], dtype=np.float64)
 
-        ap = 0
-        fd = 0
+        m_ious = 0
+        dict_ap_fd = {}
+        for t in thresholds:
+            dict_ap_fd["AP_" + str(t)] = 0
+            dict_ap_fd["FD_" + str(t)] = 0
+            
         size = 0
         
         with torch.no_grad():
@@ -89,14 +95,18 @@ class TrainerCenterNet:
                         continue
                     
                     det = rescale_detection(det)
-                    
-                    ap_l, fd_l = metric_ap.calculate(y[i], det)
-                    ap += ap_l
-                    fd += fd_l
+
+                    m_iou, ap_fd_dict = metric_ap.calculate(y[i], det)
+                    m_ious += m_iou
+                    for k, v in ap_fd_dict.items():
+                        dict_ap_fd[k] += v
                 
                 size += len(batch['image'])
-                
-        return test_losses / num_batches, ap / size, fd / size
+
+        for k, v in dict_ap_fd.items():
+            dict_ap_fd[k] = v / size
+            
+        return test_losses / num_batches, m_ious / size, dict_ap_fd
         
     def _train(self, dataloader: torch.utils.data.DataLoader):
         """Train the model for one epoch.
@@ -155,20 +165,22 @@ class TrainerCenterNet:
         for e in range(epochs):
             self._train(train_loader)
 
-            tr_losses, tr_ap, tr_fd = self.evaluate(train_loader)
-            te_losses, te_ap, te_fd = self.evaluate(test_loader)
+            tr_losses, tr_m_ious, tr_ap_fd = self.evaluate(train_loader)
+            te_losses, te_m_ious, te_ap_fd = self.evaluate(test_loader)
             
             train_losses[e] = tr_losses[0]
             test_losses[e] = te_losses[0]
            
             saved = ""
             if keep_best:
-                saved = "---> Saved" if save_model(self.model, te_fd) else ""
-                
+                saved = "---> Saved" if save_model(self.model, te_ap_fd["FD_0.05"]) else ""
+            
             print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_losses[0]:.4f}, "
-                  f"Train AP: {tr_ap:.4f}, Train FD: {tr_fd:.4f} | "
+                  f"Train mIoU: {tr_m_ious:.4f}, Train AP_50: {tr_ap_fd['AP_0.5']:.4f} "
+                  f"Train FD_50: {tr_ap_fd['FD_0.5']:.4f} | "
                   f"Test loss: {te_losses[0]:.4f}, "
-                  f"Test AP: {te_ap:.4f}, Test FD: {te_fd:.4f} {saved}\n")
+                  f"Test mIoU: {te_m_ious:.4f}, Test AP_50: {te_ap_fd['AP_0.5']:.4f} "
+                  f"Test FD_50: {te_ap_fd['FD_0.5']:.4f} {saved}\n")
             
         if keep_best:
             self.model.load_state_dict(torch.load(path_best_model))
