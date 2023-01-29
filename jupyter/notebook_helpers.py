@@ -8,34 +8,23 @@ import numpy as np
 from PIL import Image
 
 
+from os import listdir
+from os.path import isfile, join
+
+
 class NotebookHelpers:
-    def __init__(self, base: str, model_path: str = "models/center_net_model.pth"):
-        self.base = base
+    def __init__(self, base_path: str, model_path: str = "models/center_net_model.pth"):
         self.model_path = model_path
+
+        self.base_path = base_path
+        self.imgs_base_path = base_path + "images/"
 
         self.thresholds = ["0.05", "0.5", "0.75", "0.95"]
         self.metrics = ["AP_", "FD_"]
 
         self._load_model()
         self._get_metric_thresholds()
-
-    def _get_metric_thresholds(self):
-        metric_thresholds = []
-
-        for threshold in self.thresholds:
-            for metric in self.metrics:
-                metric_thresholds.append(metric + threshold)
-
-        self.metric_thresholds = metric_thresholds
-
-    def _get_metrics_average(self, ap_fd_res: dict):
-        avg_metrics = dict(
-            (metric_threshold, 0) for metric_threshold in self.metric_thresholds
-        )
-        for metric_threshold in self.metric_thresholds:
-            avg_metrics[metric_threshold] = np.mean(ap_fd_res[metric_threshold])
-
-        return avg_metrics
+        self._get_img_indexes()
 
     def print_metric_thresholds(self, curr_metric_thresholds: dict):
         print("Average Precision & False Discoveries per threshold:")
@@ -45,12 +34,16 @@ class NotebookHelpers:
             )
         print("\n")
 
-    def get_ap_dataset(self, images: np.array, print: bool = False):
+    def get_ap_dataset(self, imgs: np.array = None, print: bool = False):
         DICT_INDEX = 1
+
+        if not imgs:
+            imgs = self.img_indexes
+
         ap_fd_res = dict(
             (metric_threshold, []) for metric_threshold in self.metric_thresholds
         )
-        for image in images:
+        for image in imgs:
             curr_metrics = self.pred_image(image)
             for metric_threhsold in self.metric_thresholds:
                 ap_fd_res[metric_threhsold].append(
@@ -67,8 +60,8 @@ class NotebookHelpers:
     def pred_image(
         self, image_num: str, display: bool = False, display_labels: bool = False
     ):
-        image_name = self.base + "/images/" + str(image_num) + ".png"
-        label_name = self.base + "/labels/" + str(image_num) + ".txt"
+        image_name = self.base_path + "/images/" + str(image_num) + ".png"
+        label_name = self.base_path + "/labels/" + str(image_num) + ".txt"
 
         image = get_image(image_name)
 
@@ -116,3 +109,36 @@ class NotebookHelpers:
     def _load_model(self):
         self.model = CenterNet()
         self.model.load_state_dict(torch.load(self.model_path))
+
+    def _get_metric_thresholds(self):
+        metric_thresholds = []
+
+        for threshold in self.thresholds:
+            for metric in self.metrics:
+                metric_thresholds.append(metric + threshold)
+
+        self.metric_thresholds = metric_thresholds
+
+    def _get_metrics_average(self, ap_fd_res: dict):
+        avg_metrics = dict(
+            (metric_threshold, 0) for metric_threshold in self.metric_thresholds
+        )
+        for metric_threshold in self.metric_thresholds:
+            avg_metrics[metric_threshold] = np.mean(ap_fd_res[metric_threshold])
+
+        return avg_metrics
+
+    def _get_img_indexes(self):
+        img_paths = [
+            img_path
+            for img_path in listdir(self.imgs_base_path + "")
+            if isfile(join(self.imgs_base_path, img_path))
+        ]
+
+        img_indexes = []
+        for img_path in img_paths:
+            if img_path == ".DS_Store":
+                continue
+            img_indexes.append(img_path.removesuffix(".png"))
+
+        self.img_indexes = img_indexes
