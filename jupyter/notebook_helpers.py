@@ -26,7 +26,8 @@ class NotebookHelpers:
         self._get_metric_thresholds()
         self._get_img_indexes()
 
-    def print_metric_thresholds(self, curr_metric_thresholds: dict):
+    def print_metric_thresholds(self, avg_iou: float, curr_metric_thresholds: dict):
+        print(f"Average IoU: {round(avg_iou, 3)}\n")
         print("Average Precision & False Discoveries per threshold:")
         for metric_threshold in self.metric_thresholds:
             print(
@@ -34,7 +35,8 @@ class NotebookHelpers:
             )
         print("\n")
 
-    def get_ap_dataset(self, imgs: np.array = None, print: bool = False):
+    def get_ds_avg_metrics(self, imgs: np.array = None, print: bool = False):
+        IOU_INDEX = 0
         DICT_INDEX = 1
 
         if not imgs:
@@ -43,21 +45,24 @@ class NotebookHelpers:
         ap_fd_res = dict(
             (metric_threshold, []) for metric_threshold in self.metric_thresholds
         )
+        iou = []
+
         for image in imgs:
-            curr_metrics = self.pred_image(image)
+            curr_metrics = self.predict_img(image)
             for metric_threhsold in self.metric_thresholds:
                 ap_fd_res[metric_threhsold].append(
                     curr_metrics[DICT_INDEX][metric_threhsold]
                 )
+                iou.append(curr_metrics[IOU_INDEX])
 
-        metric_thresholds_avg = self._get_metrics_average(ap_fd_res)
+        avg_iou, metric_thresholds_avg = self._get_metrics_average(iou, ap_fd_res)
 
         if print:
-            self.print_metric_thresholds(metric_thresholds_avg)
+            self.print_metric_thresholds(avg_iou, metric_thresholds_avg)
         else:
-            return metric_thresholds_avg
+            return avg_iou, metric_thresholds_avg
 
-    def pred_image(
+    def predict_img(
         self, image_num: str, display: bool = False, display_labels: bool = False
     ):
         image_name = self.base_path + "/images/" + str(image_num) + ".png"
@@ -69,18 +74,25 @@ class NotebookHelpers:
         labels = self._get_labels(label_name)
 
         metrics = AP()
-        aIoU, metric_thresholds_res = metrics.calculate(labels, detections)
+        avg_iou, metrics = metrics.calculate(labels, detections)
 
         if display:
             if display_labels:
                 print(labels + "\n")
-            print(f"average IoU {round(aIoU, 3)}\n")
-            self.print_metric_thresholds(metric_thresholds_res)
 
-            img = image.transpose((1, 2, 0))
-            display_bbox(img, detections, False, min_global_score=0.1, plot_center=True)
+            self._display_img_prediction(image, detections, avg_iou, metrics)
         else:
-            return aIoU, metric_thresholds_res
+            return avg_iou, metrics
+
+    def _display_img_prediction(
+        self, image, detections: np.array, avg_iou: float, metrics: dict
+    ):
+
+        self.print_metric_thresholds(avg_iou, metrics)
+
+        print("Plot of the predictions:")
+        img = image.transpose((1, 2, 0))
+        display_bbox(img, detections, False, min_global_score=0.1, plot_center=True)
 
     def _get_labels(self, label_name: str):
         f = open(label_name)
@@ -119,14 +131,14 @@ class NotebookHelpers:
 
         self.metric_thresholds = metric_thresholds
 
-    def _get_metrics_average(self, ap_fd_res: dict):
+    def _get_metrics_average(self, iou: np.array, ap_fd_res: dict):
         avg_metrics = dict(
             (metric_threshold, 0) for metric_threshold in self.metric_thresholds
         )
         for metric_threshold in self.metric_thresholds:
             avg_metrics[metric_threshold] = np.mean(ap_fd_res[metric_threshold])
 
-        return avg_metrics
+        return np.mean(iou), avg_metrics
 
     def _get_img_indexes(self):
         img_paths = [
