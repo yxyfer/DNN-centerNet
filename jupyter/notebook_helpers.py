@@ -35,7 +35,7 @@ class NotebookHelpers:
             )
         print("\n")
 
-    def get_ds_avg_metrics(self, imgs: np.array = None, print: bool = False):
+    def get_ds_avg_metrics(self, imgs: np.array = None, display: bool = False):
         IOU_INDEX = 0
         DICT_INDEX = 1
 
@@ -57,7 +57,7 @@ class NotebookHelpers:
 
         avg_iou, metric_thresholds_avg = self._get_metrics_average(iou, ap_fd_res)
 
-        if print:
+        if display:
             self.print_metric_thresholds(avg_iou, metric_thresholds_avg)
         else:
             return avg_iou, metric_thresholds_avg
