@@ -3,6 +3,12 @@ import numpy as np
 
 class AP:
     def __init__(self, min_score: float = 0):
+        """Initialize the AP/IoU metric
+
+        Args:
+            min_score (float, optional): Minimum score to consider a bounding box. Defaults to 0.
+        """
+
         self.min_score = min_score
 
     def perform_iou(self, y_true, y_hat):
@@ -58,6 +64,8 @@ class AP:
         Args:
             y_true (np.array): Ground truth of shape (N, 5) | (tlx, tly, brx, bry, class)
             y_hat (np.array): Calculated values of shape (M, 8) | (tlx, tly, brx, bry, cx, cy, score, class)
+            thresholds (list, optional): List of thresholds to calculate the AP and FD. Defaults to [0.05, 0.5, 0.75, 0.95].
+            keep_zeros (bool, optional): Keep zeros in the average precision calculation. Defaults to False.
 
         Returns:
             tuple: Average IoU, average precision and false discovery rate
