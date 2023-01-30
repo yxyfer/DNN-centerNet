@@ -176,10 +176,10 @@ class TrainerCenterNet:
                 saved = "---> Saved" if save_model(self.model, te_ap_fd["FD_0.05"]) else ""
             
             print(f"Epoch {e + 1}/{epochs}, Train loss: {tr_losses[0]:.4f}, "
-                  f"Train mIoU: {tr_m_ious:.4f}, Train AP_50: {tr_ap_fd['AP_0.5']:.4f} "
+                  f"Train mIoU: {tr_m_ious:.4f}, Train AA_50: {tr_ap_fd['AP_0.5']:.4f} "
                   f"Train FD_50: {tr_ap_fd['FD_0.5']:.4f} | "
                   f"Test loss: {te_losses[0]:.4f}, "
-                  f"Test mIoU: {te_m_ious:.4f}, Test AP_50: {te_ap_fd['AP_0.5']:.4f} "
+                  f"Test mIoU: {te_m_ious:.4f}, Test AA_50: {te_ap_fd['AP_0.5']:.4f} "
                   f"Test FD_50: {te_ap_fd['FD_0.5']:.4f} {saved}\n")
             
         if keep_best:
