@@ -14,6 +14,7 @@ This project is a re-implementation of CenterNet in PyTorch for detecting digits
 
 To train this model, we first trained a backbone to classify the digits of the MNIST dataset. With the pre-trained backbone, we then trained the CenterNet model for 90 epochs (took ~2h30). The training was done using the MNIST Detection dataset with images of size 300x300 that can contain up to 30 digits per image. The final results of the training are as follows:
 
+
 |       | mIoU   | AA<sub>5</sub> | AA<sub>50</sub>  | AA<sub>75</sub> | AA<sub>95</sub> | FD<sub>5</sub> | FD<sub>50</sub> | FD<sub>75</sub> | FD<sub>95</sub> |
 | ----- | ------ | ------- | ------- | ------- | ------- | ------- | ------ | ------ | ------- |
 | Train | 0.9129 | 99.16%  | 98.75%  | 96.79%  | 31.29%  | 0.48%   | 1.71%  | 3.76%  | 68.90%  |

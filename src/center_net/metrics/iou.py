@@ -37,37 +37,41 @@ class AP:
     def calculare_ap_fd(self, y_true: np.array, y_hat: np.array, ious: np.array,
                         thresholds: list = [0.05, 0.5, 0.75, 0.95]) -> dict:
         """Calculate the average precision and false discovery rate for a given threshold
-        
+
         Args:
             y_true (np.array): Ground truth of shape (N, 5) | (tlx, tly, brx, bry, class)
             y_hat (np.array): Calculated values of shape (M, 8) | (tlx, tly, brx, bry, cx, cy, score, class)
             ious (np.array): IoU values of shape (N, M)
             thresholds (list, optional): List of thresholds to calculate the AP and FD. Defaults to [0.05, 0.5, 0.75, 0.95].
-            
+
         Returns:
             dict: Dictionary containing the AP and FD for each threshold
         """
-        
+
         dic = {}
-        
+
         for threshold in thresholds:
             fd = np.zeros(y_hat.shape[0])
             iou = np.where(ious > threshold, 1, 0)
-            
+
             best_index = np.argmax(iou, axis=1)
             ap = np.mean(iou[np.arange(y_true.shape[0]), best_index])
             fd[np.where(iou.sum(axis=0) == 0)] = 1
-            
-            dic["AP_{}".format(threshold)] = ap
+
+            dic["AA_{}".format(threshold)] = ap
             dic["FD_{}".format(threshold)] = np.mean(fd)
-            
+
         return dic
 
-    def calculate(self, y_true: np.array, y_hat: np.array, 
-                  thresholds: list = [0.05, 0.5, 0.75, 0.95],
-                  keep_zeros: bool = False) -> tuple:
-        """Calculate the average precision and false discovery rate
 
+    def calculate(
+        self,
+        y_true: np.array,
+        y_hat: np.array,
+        thresholds: list = [0.05, 0.5, 0.75, 0.95],
+        keep_zeros: bool = False,
+    ) -> tuple:
+        """Calculate the average precision and false discovery rate
         Args:
             y_true (np.array): Ground truth of shape (N, 5) | (tlx, tly, brx, bry, class)
             y_hat (np.array): Calculated values of shape (M, 8) | (tlx, tly, brx, bry, cx, cy, score, class)
@@ -97,7 +101,7 @@ class AP:
         m_iou = iou[np.arange(y_true.shape[0]), best_index]
         if not keep_zeros:
             m_iou = m_iou[m_iou != 0]
-            
+
         m_iou = np.mean(m_iou)
         
         return m_iou, self.calculare_ap_fd(y_true, y_hat, iou, thresholds)
