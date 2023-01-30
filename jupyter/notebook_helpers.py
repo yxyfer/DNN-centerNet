@@ -20,7 +20,7 @@ class NotebookHelpers:
         self.imgs_base_path = base_path + "images/"
 
         self.thresholds = ["0.05", "0.5", "0.75", "0.95"]
-        self.metrics = ["AP_", "FD_"]
+        self.metrics = ["AA_", "FD_"]
 
         self._load_model()
         self._get_metric_thresholds()
@@ -28,18 +28,18 @@ class NotebookHelpers:
 
     def print_metric_thresholds(self, avg_iou: float, curr_metric_thresholds: dict):
         print(f"Average IoU: {round(avg_iou, 3)}\n")
-        print("Average Precision & False Discoveries per threshold:")
+        print("Average Accuracy & False Discoveries per threshold:")
         for metric_threshold in self.metric_thresholds:
             print(
                 f"{metric_threshold:7}: {round(curr_metric_thresholds[metric_threshold], 3)}"
             )
         print("\n")
 
-    def get_ds_avg_metrics(self, imgs: np.array = None, display: bool = False):
+    def get_ds_avg_metrics(self, imgs: np.array = [], display: bool = False):
         IOU_INDEX = 0
         DICT_INDEX = 1
 
-        if not imgs:
+        if imgs == []:
             imgs = self.img_indexes
 
         ap_fd_res = dict(
